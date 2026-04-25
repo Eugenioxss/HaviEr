@@ -12,7 +12,7 @@ CORS(app) # Importante para que tu Frontend no tenga errores de conexión
 
 # Configuración de Gemini
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-model = genai.GenerativeModel('gemini-2.0-flash-lite')
+model = genai.GenerativeModel('gemini-2.0-flash-lite-001')
 
 @app.route('/api/chat-havi', methods=['POST'])
 def chat_havi():
