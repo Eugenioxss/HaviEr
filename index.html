@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Havi - Hey Banco</title>
+    <style>
+        :root {
+            --hey-blue: #00f0ff;
+            --hey-pink: #ff00ea;
+            --bg-dark: #0a0a0f;
+            --glass-bg: rgba(20, 20, 30, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(0, 240, 255, 0.15), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(255, 0, 234, 0.15), transparent 25%);
+        }
+
+        .container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2rem;
+            width: 90%;
+            max-width: 800px;
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            background: linear-gradient(90deg, var(--hey-blue), var(--hey-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .control-panel {
+            background: rgba(0,0,0,0.3);
+            padding: 1rem;
+            border-radius: 12px;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .control-panel label {
+            font-size: 0.9rem;
+            color: #aaa;
+        }
+
+        input, select {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--glass-border);
+            color: #fff;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            outline: none;
+            width: 100%;
+            transition: all 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            border-color: var(--hey-blue);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.2);
+        }
+
+        .chat-box {
+            background: rgba(0,0,0,0.4);
+            border-radius: 12px;
+            padding: 1.5rem;
+            min-height: 200px;
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid var(--glass-border);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .message {
+            padding: 1rem;
+            border-radius: 12px;
+            max-width: 80%;
+            line-height: 1.5;
+        }
+
+        .message.user {
+            background: rgba(255, 255, 255, 0.1);
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.havi {
+            background: linear-gradient(135deg, rgba(0, 240, 255, 0.1), rgba(255, 0, 234, 0.1));
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+            border: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        .input-area {
+            display: flex;
+            gap: 1rem;
+        }
+
+        button {
+            background: linear-gradient(45deg, var(--hey-blue), var(--hey-pink));
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(255, 0, 234, 0.4);
+        }
+
+        .loading {
+            display: none;
+            align-self: flex-start;
+            color: var(--hey-blue);
+            font-style: italic;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Havi Core</h1>
+        
+        <div class="control-panel">
+            <label for="perfilSimulado">🔍 Motor ML (Clustering):</label>
+            <select id="perfilSimulado">
+                <option value="Joven Universitario, alto gasto en apps, bajo ahorro">Cluster 1: Gen-Z Tecnológico</option>
+                <option value="Viajero frecuente, altos ingresos, transacciones internacionales">Cluster 2: Viajero Premium</option>
+                <option value="Usuario tradicional, pagos en efectivo, temeroso del crédito">Cluster 3: Tradicional Precavido</option>
+            </select>
+        </div>
+
+        <div class="chat-box" id="chatBox">
+            <div class="message havi">
+                Iniciando enlace neuronal... Havi en línea. ¿Qué analizamos hoy?
+            </div>
+        </div>
+
+        <div class="loading" id="loadingIndicator">Havi está procesando datos transaccionales...</div>
+
+        <div class="input-area">
+            <input type="text" id="userInput" placeholder="Escribe un mensaje para activar a Havi..." onkeypress="handleKeyPress(event)">
+            <button onclick="sendMessage()">Enviar</button>
+        </div>
+    </div>
+
+    <script>
+        async function sendMessage() {
+            const inputField = document.getElementById('userInput');
+            const message = inputField.value.trim();
+            const perfil = document.getElementById('perfilSimulado').value;
+            const chatBox = document.getElementById('chatBox');
+            const loading = document.getElementById('loadingIndicator');
+
+            if (!message) return;
+
+            // Agregar mensaje del usuario a la pantalla
+            appendMessage('user', message);
+            inputField.value = '';
+            
+            // Mostrar indicador de carga
+            loading.style.display = 'block';
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            try {
+                // Hacer la petición a tu Backend de Flask
+                const response = await fetch('http://127.0.0.1:5000/api/chat-havi', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        perfil: perfil,
+                        mensaje: message
+                    })
+                });
+
+                const data = await response.json();
+
+                // Ocultar carga
+                loading.style.display = 'none';
+
+                if (data.status === 'success') {
+                    // Procesar negritas de Markdown a HTML simple para que se vea bien
+                    let formattedResponse = data.respuesta_havi.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                    appendMessage('havi', formattedResponse);
+                } else {
+                    appendMessage('havi', 'Error en el sistema central: ' + data.message);
+                }
+
+            } catch (error) {
+                loading.style.display = 'none';
+                appendMessage('havi', 'Error de conexión. Verifica que el cerebro Flask esté corriendo en el puerto 5000.');
+                console.error('Error:', error);
+            }
+        }
+
+        function appendMessage(sender, text) {
+            const chatBox = document.getElementById('chatBox');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            messageDiv.innerHTML = text; // Usamos innerHTML por si Gemini manda formato
+            chatBox.appendChild(messageDiv);
+            chatBox.scrollTop = chatBox.scrollHeight;
+        }
+
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+    </script>
+</body>
+</html>
