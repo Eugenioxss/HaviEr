@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hey Banco — Asistente IA</title>
+  <title>Hey Banco — HaviEr Asistente IA</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -40,78 +40,34 @@
       justify-content: space-between;
     }
 
-    .nav-logo {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
-    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
 
     .logo-mark {
-      width: 36px;
-      height: 36px;
+      width: 36px; height: 36px;
       background: #83643e;
       border-radius: 9px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
     }
 
     .logo-mark svg { width: 20px; height: 20px; }
 
     .logo-text {
-      font-size: 19px;
-      font-weight: 700;
+      font-size: 19px; font-weight: 700;
       color: #3a3a3a;
       letter-spacing: -0.4px;
     }
 
     .logo-text span { color: #83643e; }
 
-    .nav-right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
     .nav-tag {
       font-size: 11px;
-      color: #6c757d;
-      border: 1px solid rgba(108,117,125,0.3);
-      padding: 3px 10px;
-      border-radius: 20px;
-      background: rgba(108,117,125,0.07);
-      font-weight: 500;
-    }
-
-    .login-btn {
-      background: #6c757d;
-      color: #ffffff;
-      border: none;
-      padding: 8px 18px;
-      border-radius: 9px;
-      font-size: 13px;
-      font-weight: 600;
-      cursor: pointer;
-      letter-spacing: 0.2px;
-      transition: background 0.15s;
-    }
-
-    .login-btn:hover { background: #5a6268; }
-
-    .signup-btn {
-      background: transparent;
       color: #83643e;
-      border: 1px solid #83643e;
-      padding: 8px 14px;
-      border-radius: 9px;
-      font-size: 13px;
+      border: 1px solid rgba(131,100,62,0.4);
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(131,100,62,0.1);
       font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
     }
-
-    .signup-btn:hover { background: #83643e; color: #ffffff; }
 
     /* ── Hero ── */
     .hero {
@@ -153,8 +109,7 @@
     }
 
     .dot-live {
-      width: 6px;
-      height: 6px;
+      width: 6px; height: 6px;
       background: #83643e;
       border-radius: 50%;
       animation: pulse 1.5s infinite;
@@ -166,7 +121,7 @@
     }
 
     .hero h1 {
-      font-size: 22px;
+      font-size: 24px;
       font-weight: 700;
       color: #3a3a3a;
       margin-bottom: 6px;
@@ -182,13 +137,95 @@
       line-height: 1.6;
     }
 
+    /* ── Selector de cliente ── */
+    .client-selector {
+      background: #e5e0c3;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #83643e;
+      margin: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .client-selector label {
+      font-size: 12px;
+      color: #5a4a30;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .id-badge {
+      display: inline-block;
+      background: #83643e;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input-wrapper input {
+      flex: 1;
+      background: #ffffff;
+      border: 1px solid #83643e;
+      color: #3a3a3a;
+      padding: 8px 12px;
+      border-radius: 8px;
+      outline: none;
+      font-size: 13px;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper input:focus { border-color: #5a4a30; }
+
+    .input-wrapper button {
+      background: #83643e;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .input-wrapper button:hover { background: #5a4a30; }
+    .input-wrapper button:active { transform: scale(0.96); }
+    .input-wrapper button:disabled { background: #b0a890; cursor: not-allowed; }
+
+    .client-status {
+      font-size: 11px;
+      color: #5a4a30;
+      font-style: italic;
+      padding-left: 2px;
+      min-height: 14px;
+    }
+
+    .client-status.connected { color: #2d7a3e; font-style: normal; font-weight: 600; }
+    .client-status.error { color: #c0392b; font-style: normal; font-weight: 600; }
+
     /* ── Quick chips ── */
     .quick-chips {
       display: flex;
       gap: 8px;
       flex-wrap: wrap;
       justify-content: center;
-      padding: 0 20px 14px;
+      padding: 6px 20px 14px;
     }
 
     .chip {
@@ -204,10 +241,12 @@
       font-family: inherit;
     }
 
-    .chip:hover {
+    .chip:hover:not(:disabled) {
       background: #83643e;
       color: #ffffff;
     }
+
+    .chip:disabled { opacity: 0.5; cursor: not-allowed; }
 
     /* ── Chat area ── */
     .chat-area {
@@ -233,13 +272,10 @@
     .msg.user { flex-direction: row-reverse; }
 
     .avatar {
-      width: 30px;
-      height: 30px;
+      width: 30px; height: 30px;
       border-radius: 50%;
       background: #83643e;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
       font-size: 12px;
       font-weight: 700;
@@ -283,8 +319,7 @@
     }
 
     .typing span {
-      width: 6px;
-      height: 6px;
+      width: 6px; height: 6px;
       background: #83643e;
       border-radius: 50%;
       animation: bounce 1.2s infinite;
@@ -298,45 +333,13 @@
       30% { transform: translateY(-7px); }
     }
 
-    /* ── Control panel ── */
-    .control-panel {
-      background: #e5e0c3;
-      padding: 10px 14px;
-      border-radius: 10px;
-      border: 1px solid #83643e;
-      margin: 10px 16px;
-      display: flex;
-      gap: 10px;
-      align-items: center;
-    }
-
-    .control-panel label {
-      font-size: 12px;
-      color: #5a4a30;
-      font-weight: 500;
-      white-space: nowrap;
-    }
-
-    .control-panel select {
-      flex: 1;
-      background: #ffffff;
-      border: 1px solid #83643e;
-      color: #3a3a3a;
-      padding: 7px 10px;
-      border-radius: 8px;
-      outline: none;
-      font-size: 12px;
-      font-family: inherit;
-    }
-
-    .control-panel select:focus { border-color: #5a4a30; }
-
     /* ── Feature strip ── */
     .feature-strip {
       display: flex;
       border-top: 1px solid #83643e;
       border-bottom: 1px solid #83643e;
       background: #f2f0e2;
+      margin-top: 10px;
     }
 
     .feat {
@@ -376,315 +379,41 @@
     .chat-input::placeholder { color: #b0a890; }
     .chat-input:focus { border-color: #5a4a30; }
 
+    .chat-input:disabled {
+      background: #f0ede0;
+      cursor: not-allowed;
+    }
+
     .send-btn {
-      width: 38px;
-      height: 38px;
+      width: 38px; height: 38px;
       background: #83643e;
       border: none;
       border-radius: 10px;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
+      display: flex; align-items: center; justify-content: center;
       flex-shrink: 0;
       transition: background 0.15s, transform 0.1s;
     }
 
-    .send-btn:hover { background: #5a4a30; }
+    .send-btn:hover:not(:disabled) { background: #5a4a30; }
     .send-btn:active { transform: scale(0.95); }
+    .send-btn:disabled { background: #b0a890; cursor: not-allowed; }
     .send-btn svg { width: 16px; height: 16px; fill: #fff; }
 
-    /* ── Modal ── */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(108,117,125,0.5);
-      backdrop-filter: blur(4px);
-      z-index: 100;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-
-    .modal-overlay.open { display: flex; }
-
-    .modal {
-      background: #6c757d;
-      border: 1px solid #5a6268;
-      border-radius: 18px;
-      padding: 28px;
-      width: 100%;
-      max-width: 380px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      max-height: 90vh;
-      overflow-y: auto;
-    }
-
-    .modal::-webkit-scrollbar { width: 5px; }
-    .modal::-webkit-scrollbar-thumb { background: #83643e; border-radius: 4px; }
-
-    .modal-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 4px;
-    }
-
-    .modal-title {
-      font-size: 17px;
-      font-weight: 700;
-      color: #ffffff;
-    }
-
-    .modal-close {
-      background: none;
-      border: none;
-      color: #d8d4c0;
-      font-size: 20px;
-      cursor: pointer;
-      line-height: 1;
-    }
-
-    .modal-close:hover { color: #ffffff; }
-
-    .field-label {
-      font-size: 11px;
-      color: #e5e0c3;
-      margin-bottom: 5px;
-      font-weight: 500;
-      letter-spacing: 0.3px;
-    }
-
-    .field-input, .field-select {
-      width: 100%;
-      background: #ffffff;
-      border: 1px solid #d8d4c0;
-      color: #3a3a3a;
-      border-radius: 9px;
-      padding: 10px 14px;
-      font-size: 13px;
-      outline: none;
-      font-family: inherit;
-      transition: border-color 0.15s;
-    }
-
-    .field-input:focus, .field-select:focus { border-color: #83643e; }
-
-    /* Toggle group (multiple options) */
-    .toggle-group {
-      display: flex;
-      gap: 6px;
-      flex-wrap: wrap;
-    }
-
-    .toggle-btn {
-      flex: 1;
-      min-width: 60px;
-      background: #ffffff;
-      border: 1px solid #d8d4c0;
-      color: #3a3a3a;
-      padding: 9px 6px;
-      border-radius: 9px;
-      cursor: pointer;
-      font-size: 12px;
-      font-weight: 500;
-      font-family: inherit;
-      transition: all 0.15s;
-      text-align: center;
-    }
-
-    .toggle-btn:hover { border-color: #83643e; }
-    .toggle-btn.selected {
+    .cluster-tag {
+      display: inline-block;
+      font-size: 10px;
       background: #83643e;
       color: #ffffff;
-      border-color: #83643e;
-    }
-
-    /* Slider 1-10 */
-    .slider-container {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .slider-input {
-      flex: 1;
-      -webkit-appearance: none;
-      appearance: none;
-      height: 6px;
-      background: #d8d4c0;
-      border-radius: 5px;
-      outline: none;
-    }
-
-    .slider-input::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 18px;
-      height: 18px;
-      background: #83643e;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid #ffffff;
-    }
-
-    .slider-input::-moz-range-thumb {
-      width: 18px;
-      height: 18px;
-      background: #83643e;
-      border-radius: 50%;
-      cursor: pointer;
-      border: 2px solid #ffffff;
-    }
-
-    .slider-value {
-      background: #83643e;
-      color: #ffffff;
-      font-size: 13px;
-      font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 8px;
-      min-width: 36px;
-      text-align: center;
-    }
-
-    .modal-submit {
-      width: 100%;
-      background: #f2f0e2;
-      color: #3a3a3a;
-      border: none;
-      border-radius: 9px;
-      padding: 11px;
-      font-size: 14px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-top: 6px;
       font-weight: 600;
-      cursor: pointer;
-      font-family: inherit;
-      transition: background 0.15s;
-      margin-top: 8px;
     }
-
-    .modal-submit:hover { background: #e5e0c3; }
-
-    .modal-footer {
-      text-align: center;
-      font-size: 12px;
-      color: #d8d4c0;
-    }
-
-    .modal-footer a {
-      color: #ffffff;
-      text-decoration: underline;
-      cursor: pointer;
-    }
-
-    .user-badge {
-      display: none;
-      font-size: 11px;
-      color: #6c757d;
-      background: rgba(108,117,125,0.1);
-      border: 1px solid rgba(108,117,125,0.3);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-weight: 500;
-    }
-
-    .user-badge.active { display: inline-block; }
-
-    .field-group { margin-bottom: 4px; }
   </style>
 </head>
 <body>
 
-<!-- Login modal -->
-<div class="modal-overlay" id="loginModal" onclick="closeModalOutside(event, 'loginModal')">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Iniciar sesión</span>
-      <button class="modal-close" onclick="closeModal('loginModal')">&#x2715;</button>
-    </div>
-    <div class="field-group">
-      <div class="field-label">TELÉFONO O CORREO</div>
-      <input class="field-input" id="loginEmail" type="text" placeholder="ejemplo@hey.inc" />
-    </div>
-    <div class="field-group">
-      <div class="field-label">CONTRASEÑA</div>
-      <input class="field-input" id="loginPassword" type="password" placeholder="••••••••" />
-    </div>
-    <button class="modal-submit" onclick="login()">Entrar a mi cuenta</button>
-    <div class="modal-footer">¿No tienes cuenta? <a onclick="switchToSignup()">Regístrate gratis</a></div>
-  </div>
-</div>
-
-<!-- Signup modal -->
-<div class="modal-overlay" id="signupModal" onclick="closeModalOutside(event, 'signupModal')">
-  <div class="modal">
-    <div class="modal-header">
-      <span class="modal-title">Crear cuenta</span>
-      <button class="modal-close" onclick="closeModal('signupModal')">&#x2715;</button>
-    </div>
-
-    <div class="field-group">
-      <div class="field-label">¿CUÁL ES TU EDAD?</div>
-      <input class="field-input" id="signupEdad" type="number" placeholder="Ej. 25" min="18" max="100" />
-    </div>
-
-    <div class="field-group">
-      <div class="field-label">¿CUÁL ES TU INGRESO MENSUAL APROXIMADO?</div>
-      <input class="field-input" id="signupIngreso" type="text" placeholder="Ej. $15,000 MXN" />
-    </div>
-
-    <div class="field-group">
-      <div class="field-label">¿EN QUÉ ESTADO VIVES?</div>
-      <input class="field-input" id="signupEstado" type="text" placeholder="Ej. Nuevo León" />
-    </div>
-
-    <div class="field-group">
-      <div class="field-label">¿EN QUÉ CIUDAD VIVES?</div>
-      <input class="field-input" id="signupCiudad" type="text" placeholder="Ej. Monterrey" />
-    </div>
-
-    <div class="field-group">
-      <div class="field-label">¿CUÁNTOS PRODUCTOS FINANCIEROS USAS ACTUALMENTE?</div>
-      <input class="field-input" id="signupProductos" type="number" placeholder="Ej. 3" min="0" max="20" />
-    </div>
-
-    <div class="field-group">
-      <div class="field-label">INTERÉS EN RECOMENDACIONES FINANCIERAS (1-10)</div>
-      <div class="slider-container">
-        <input type="range" min="1" max="10" value="5" class="slider-input" id="signupInteres" oninput="document.getElementById('interesValue').textContent = this.value" />
-        <div class="slider-value" id="interesValue">5</div>
-      </div>
-    </div>
-
-    <div class="field-group">
-      <div class="field-label">¿QUÉ PRODUCTO TE INTERESA MÁS?</div>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-field="producto" data-value="cuenta" onclick="selectToggle(this)">Cuenta</button>
-        <button class="toggle-btn" data-field="producto" data-value="tarjeta" onclick="selectToggle(this)">Tarjeta</button>
-        <button class="toggle-btn" data-field="producto" data-value="credito" onclick="selectToggle(this)">Crédito</button>
-        <button class="toggle-btn" data-field="producto" data-value="seguro" onclick="selectToggle(this)">Seguro</button>
-        <button class="toggle-btn" data-field="producto" data-value="inversion" onclick="selectToggle(this)">Inversión</button>
-      </div>
-    </div>
-
-    <div class="field-group">
-      <div class="field-label">FRECUENCIA DE TRANSACCIONES DIGITALES</div>
-      <div class="toggle-group">
-        <button class="toggle-btn" data-field="frecuencia" data-value="baja" onclick="selectToggle(this)">Baja</button>
-        <button class="toggle-btn" data-field="frecuencia" data-value="media" onclick="selectToggle(this)">Media</button>
-        <button class="toggle-btn" data-field="frecuencia" data-value="alta" onclick="selectToggle(this)">Alta</button>
-      </div>
-    </div>
-
-    <button class="modal-submit" onclick="signup()">Crear mi cuenta</button>
-    <div class="modal-footer">¿Ya tienes cuenta? <a onclick="switchToLogin()">Inicia sesión</a></div>
-  </div>
-</div>
-
-<!-- App -->
 <div class="app">
 
   <nav class="navbar">
@@ -697,39 +426,44 @@
       </div>
       <span class="logo-text">hey<span>,</span> banco</span>
     </a>
-    <div class="nav-right">
-      <span class="user-badge" id="userBadge"></span>
-      <button class="signup-btn" id="signupBtn" onclick="openModal('signupModal')">Crear cuenta</button>
-      <button class="login-btn" id="loginBtn" onclick="openModal('loginModal')">Iniciar sesión</button>
-    </div>
+    <span class="nav-tag">Demo Hackathon</span>
   </nav>
 
   <div class="hero">
     <div class="hero-glow"></div>
     <div class="hero-badge"><span class="dot-live"></span>Asistente activo</div>
     <h1><span>HaviEr</span></h1>
-    <p>Consulta tu saldo, transfiere dinero o resuelve cualquier duda. Disponible 24/7.</p>
+    <p>Asistente proactivo con IA. Ingresa el ID del cliente para iniciar una conversación personalizada.</p>
   </div>
 
-  <div class="control-panel">
-            <label for="clienteId">🆔 ID de Cliente:</label>
-            <input type="text" id="clienteId" placeholder="Ej. 12345" style="width: 150px;">
-            <div id="statusCluster" style="color: var(--hey-blue); font-size: 0.85rem; font-style: italic;">
-                Esperando conexión...
-            </div>
+  <div class="client-selector">
+    <label for="clientInput">
+      <span class="id-badge">ID</span> Cliente:
+    </label>
+    <div class="input-wrapper">
+      <input
+        type="text"
+        id="clientInput"
+        placeholder="Ej. USR-00001"
+        autocomplete="off"
+        maxlength="10"
+      />
+      <button id="loadClientBtn" type="button">Cargar</button>
     </div>
+    <p id="clientStatus" class="client-status">⏸ Esperando ID de cliente...</p>
+  </div>
 
   <div class="quick-chips">
-    <button class="chip" onclick="selectChip('¿Cuál es mi saldo actual?')">Ver mi saldo</button>
-    <button class="chip" onclick="selectChip('Quiero hacer una transferencia')">Transferir</button>
-    <button class="chip" onclick="selectChip('¿Cómo activo mi tarjeta?')">Activar tarjeta</button>
-    <button class="chip" onclick="selectChip('¿Cuáles son mis movimientos recientes?')">Movimientos</button>
+    <button class="chip" onclick="selectChip('Hola Havi, ¿quién soy yo según tus datos?')">¿Quién soy?</button>
+    <button class="chip" onclick="selectChip('¿Qué oportunidades tienes para mí?')">Oportunidades</button>
+    <button class="chip" onclick="selectChip('Dame un consejo financiero personalizado')">Consejo</button>
+    <button class="chip" onclick="selectChip('¿Cómo está mi salud financiera?')">Mi salud financiera</button>
   </div>
 
   <div class="chat-area" id="chat">
     <div class="msg bot">
       <div class="avatar">H</div>
-      <div class="bubble bot-bubble">¡Hola! Soy HaviEr, tu asistente de hey, banco. ¿En qué te puedo ayudar hoy? Puedo consultar tu saldo, ayudarte a transferir dinero o resolver tus dudas.</div>
+      <div class="bubble bot-bubble">¡Hola! Soy <strong>HaviEr</strong>, tu asistente proactivo de hey, banco. Ingresa un ID de cliente (ej. <strong>USR-00001</strong>) y presiona <strong>Cargar</strong> para comenzar.</div>
     </div>
   </div>
 
@@ -737,12 +471,12 @@
     <div class="feat"><div class="feat-icon">🔒</div><div class="feat-label">Seguro</div></div>
     <div class="feat"><div class="feat-icon">⚡</div><div class="feat-label">Instantáneo</div></div>
     <div class="feat"><div class="feat-icon">🤖</div><div class="feat-label">IA predictiva</div></div>
-    <div class="feat"><div class="feat-icon">💳</div><div class="feat-label">Sin costo</div></div>
+    <div class="feat"><div class="feat-icon">💳</div><div class="feat-label">Personalizado</div></div>
   </div>
 
   <div class="input-row">
-    <input class="chat-input" id="userInput" type="text" placeholder="Escribe tu mensaje..." />
-    <button class="send-btn" id="sendBtn">
+    <input class="chat-input" id="userInput" type="text" placeholder="Carga un cliente primero..." disabled />
+    <button class="send-btn" id="sendBtn" disabled>
       <svg viewBox="0 0 16 16"><path d="M1 8l13-7-4 7 4 7z"/></svg>
     </button>
   </div>
@@ -751,19 +485,78 @@
 
 <script>
   // ════════════════════════════════════
-  // CHAT (Backend Flask)
+  // CONFIGURACIÓN
   // ════════════════════════════════════
-  function addMsg(text, isUser) {
+  const API_URL = 'http://127.0.0.1:5000/api/chat-havi';
+  const USER_ID_REGEX = /^USR-\d{5}$/;
+  let currentUserId = '';
+
+  // ════════════════════════════════════
+  // CARGAR CLIENTE
+  // ════════════════════════════════════
+  function loadClient() {
+    const input = document.getElementById('clientInput');
+    const status = document.getElementById('clientStatus');
+    const chatInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    const id = input.value.trim().toUpperCase();
+    input.value = id;
+
+    if (!id) {
+      status.textContent = '⚠️ Ingresa un ID de cliente';
+      status.className = 'client-status error';
+      return;
+    }
+
+    if (!USER_ID_REGEX.test(id)) {
+      status.textContent = '⚠️ Formato inválido. Usa USR-##### (ej. USR-00001)';
+      status.className = 'client-status error';
+      return;
+    }
+
+    currentUserId = id;
+    status.textContent = `✅ Cliente activo: ${currentUserId}`;
+    status.className = 'client-status connected';
+
+    chatInput.disabled = false;
+    sendBtn.disabled = false;
+    chatInput.placeholder = 'Escribe tu mensaje...';
+
+    // Limpia el chat y muestra saludo contextual
+    const chat = document.getElementById('chat');
+    chat.innerHTML = '';
+    addMsg(`Listo. Estoy revisando el perfil de <strong>${currentUserId}</strong>. ¿En qué te puedo ayudar?`, false);
+    chatInput.focus();
+  }
+
+  // ════════════════════════════════════
+  // RENDER DE MENSAJES
+  // ════════════════════════════════════
+  function addMsg(text, isUser, clusterName = null) {
     const chat = document.getElementById('chat');
     const msg = document.createElement('div');
     msg.className = 'msg ' + (isUser ? 'user' : 'bot');
+
     const av = document.createElement('div');
     av.className = 'avatar' + (isUser ? ' user-av' : '');
     av.textContent = isUser ? 'Tú' : 'H';
+
     const bubble = document.createElement('div');
     bubble.className = 'bubble ' + (isUser ? 'user-bubble' : 'bot-bubble');
-    if (isUser) bubble.textContent = text;
-    else bubble.innerHTML = text;
+
+    if (isUser) {
+      bubble.textContent = text;
+    } else {
+      bubble.innerHTML = text;
+      if (clusterName) {
+        const tag = document.createElement('div');
+        tag.className = 'cluster-tag';
+        tag.textContent = '🎯 ' + clusterName;
+        bubble.appendChild(tag);
+      }
+    }
+
     msg.appendChild(av);
     msg.appendChild(bubble);
     chat.appendChild(msg);
@@ -792,183 +585,86 @@
     if (t) t.remove();
   }
 
+  // ════════════════════════════════════
+  // ENVÍO DE MENSAJE
+  // ════════════════════════════════════
   async function sendMsg() {
     const inp = document.getElementById('userInput');
+    const status = document.getElementById('clientStatus');
     const text = inp.value.trim();
-    // 1. Ahora leemos el ID que escribes en la cajita
-    const idField = document.getElementById('clienteId');
-    const clientId = idField.value.trim();
 
     if (!text) return;
-    
-    // 2. Validación de seguridad
-    if (!clientId) {
-        alert("⚠️ Por favor ingresa un ID de Cliente válido en el panel superior.");
-        return;
+    if (!currentUserId) {
+      alert('⚠️ Carga un cliente primero');
+      return;
     }
 
     inp.value = '';
     addMsg(text, true);
     addTyping();
-    
-    // 3. Efecto visual de que está pensando
-    const statusCluster = document.getElementById('statusCluster');
-    statusCluster.innerText = "Consultando base de datos neuronal...";
+    status.textContent = '🧠 HaviEr está analizando...';
+    status.className = 'client-status';
 
     try {
-      const response = await fetch('http://127.0.0.1:5000/api/chat-havi', {
+      const response = await fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        // 4. Mandamos el id_cliente exacto que espera Flask
-        body: JSON.stringify({ id_cliente: clientId, mensaje: text })
+        body: JSON.stringify({
+          user_id: currentUserId,
+          mensaje: text
+        })
       });
-      
+
       const data = await response.json();
       removeTyping();
 
-      if (data.status === 'success') {
-        // 5. Mostramos el resultado del modelo en la pantalla
-        statusCluster.innerText = "Diagnóstico ML: " + data.perfil_detectado;
-
-        let formatted = data.respuesta_havi.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+      if (response.ok && data.respuesta) {
+        let formatted = data.respuesta.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
         formatted = formatted.replace(/\n/g, '<br>');
-        addMsg(formatted, false);
+        addMsg(formatted, false, data.cluster_nombre);
+        status.textContent = `✅ Cliente activo: ${currentUserId}`;
+        status.className = 'client-status connected';
       } else {
-        statusCluster.innerText = "Error en análisis";
-        addMsg('⚠️ Error: ' + data.message, false);
+        const errorMsg = data.error || 'Error desconocido';
+        addMsg('⚠️ ' + errorMsg, false);
+        status.textContent = '❌ ' + errorMsg;
+        status.className = 'client-status error';
       }
     } catch (error) {
       removeTyping();
-      statusCluster.innerText = "Desconectado";
-      addMsg('⚠️ Error de conexión. Verifica que Flask esté corriendo en el puerto 5000.', false);
+      addMsg('⚠️ Error de conexión. Verifica que el backend Flask esté corriendo en el puerto 5000.', false);
+      status.textContent = '❌ Backend desconectado';
+      status.className = 'client-status error';
       console.error('Error:', error);
     }
   }
 
   function selectChip(msg) {
+    if (!currentUserId) {
+      alert('⚠️ Carga un cliente primero');
+      return;
+    }
     document.getElementById('userInput').value = msg;
     sendMsg();
   }
 
+  // ════════════════════════════════════
+  // EVENTOS
+  // ════════════════════════════════════
+  document.getElementById('loadClientBtn').addEventListener('click', loadClient);
+
+  document.getElementById('clientInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      loadClient();
+    }
+  });
+
   document.getElementById('userInput').addEventListener('keydown', e => {
     if (e.key === 'Enter') sendMsg();
   });
+
   document.getElementById('sendBtn').addEventListener('click', sendMsg);
-
-  // ════════════════════════════════════
-  // MODALES
-  // ════════════════════════════════════
-  function openModal(id) { document.getElementById(id).classList.add('open'); }
-  function closeModal(id) { document.getElementById(id).classList.remove('open'); }
-  function closeModalOutside(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
-  function switchToSignup() { closeModal('loginModal'); openModal('signupModal'); }
-  function switchToLogin() { closeModal('signupModal'); openModal('loginModal'); }
-
-  // ════════════════════════════════════
-  // TOGGLE BUTTONS
-  // ════════════════════════════════════
-  function selectToggle(btn) {
-    const field = btn.getAttribute('data-field');
-    document.querySelectorAll(`.toggle-btn[data-field="${field}"]`).forEach(b => {
-      b.classList.remove('selected');
-    });
-    btn.classList.add('selected');
-  }
-
-  // ════════════════════════════════════
-  // LOGIN
-  // ════════════════════════════════════
-  function login() {
-    const email = document.getElementById('loginEmail').value.trim();
-    const password = document.getElementById('loginPassword').value.trim();
-    if (!email || !password) { alert('Por favor llena todos los campos'); return; }
-    if (!email.includes('@')) { alert('Email inválido'); return; }
-    localStorage.setItem('userEmail', email);
-    updateUIAfterLogin(email);
-    document.getElementById('loginEmail').value = '';
-    document.getElementById('loginPassword').value = '';
-    closeModal('loginModal');
-  }
-
-  // ════════════════════════════════════
-  // SIGNUP — 8 PREGUNTAS NUEVAS
-  // ════════════════════════════════════
-  function signup() {
-    const edad = document.getElementById('signupEdad').value.trim();
-    const ingreso = document.getElementById('signupIngreso').value.trim();
-    const estado = document.getElementById('signupEstado').value.trim();
-    const ciudad = document.getElementById('signupCiudad').value.trim();
-    const productos = document.getElementById('signupProductos').value.trim();
-    const interes = document.getElementById('signupInteres').value;
-    const producto = document.querySelector('.toggle-btn[data-field="producto"].selected');
-    const frecuencia = document.querySelector('.toggle-btn[data-field="frecuencia"].selected');
-
-    if (!edad || !ingreso || !estado || !ciudad || !productos || !producto || !frecuencia) {
-      alert('Por favor completa todos los campos');
-      return;
-    }
-
-    const userData = {
-      edad: parseInt(edad),
-      ingreso_mensual: ingreso,
-      estado: estado,
-      ciudad: ciudad,
-      productos_financieros: parseInt(productos),
-      interes_recomendaciones: parseInt(interes),
-      producto_interes: producto.getAttribute('data-value'),
-      frecuencia_digital: frecuencia.getAttribute('data-value')
-    };
-
-    localStorage.setItem('userData', JSON.stringify(userData));
-    localStorage.setItem('userEmail', `usuario_${edad}@hey.inc`);
-
-    console.log('✅ Datos del usuario para clustering ML:', userData);
-
-    // OPCIONAL: Enviar al backend Flask para clustering automático
-    // fetch('http://127.0.0.1:5000/api/registrar-usuario', {
-    //   method: 'POST',
-    //   headers: { 'Content-Type': 'application/json' },
-    //   body: JSON.stringify(userData)
-    // }).then(r => r.json()).then(d => console.log('Cluster asignado:', d));
-
-    updateUIAfterLogin(`Usuario ${edad}a`);
-
-    // Limpiar
-    document.querySelectorAll('.toggle-btn.selected').forEach(b => b.classList.remove('selected'));
-    document.getElementById('signupEdad').value = '';
-    document.getElementById('signupIngreso').value = '';
-    document.getElementById('signupEstado').value = '';
-    document.getElementById('signupCiudad').value = '';
-    document.getElementById('signupProductos').value = '';
-    document.getElementById('signupInteres').value = 5;
-    document.getElementById('interesValue').textContent = '5';
-
-    closeModal('signupModal');
-    alert('¡Cuenta creada! Bienvenido a hey, banco 🎉');
-  }
-
-  function updateUIAfterLogin(displayName) {
-    const userBadge = document.getElementById('userBadge');
-    userBadge.textContent = displayName;
-    userBadge.classList.add('active');
-    document.getElementById('loginBtn').textContent = 'Salir';
-    document.getElementById('loginBtn').onclick = logout;
-    document.getElementById('signupBtn').style.display = 'none';
-  }
-
-  function logout() {
-    localStorage.removeItem('userEmail');
-    localStorage.removeItem('userData');
-    document.getElementById('userBadge').classList.remove('active');
-    document.getElementById('loginBtn').textContent = 'Iniciar sesión';
-    document.getElementById('loginBtn').onclick = () => openModal('loginModal');
-    document.getElementById('signupBtn').style.display = 'inline-block';
-  }
-
-  window.addEventListener('load', () => {
-    const savedEmail = localStorage.getItem('userEmail');
-    if (savedEmail) updateUIAfterLogin(savedEmail);
-  });
 </script>
 </body>
 </html>
