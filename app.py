@@ -326,6 +326,9 @@ Responde de forma BREVE (máx 4 líneas), natural y útil. Si es relevante, sugi
 @rate_limit
 def insight_proactivo():
     data = request.get_json() or {}
+    print("=" * 60)
+    print(f"🟡 INSIGHT recibió: {data}")
+    print("=" * 60)
     uid = str(data.get('user_id', ''))
 
     perfil = obtener_perfil(uid)
