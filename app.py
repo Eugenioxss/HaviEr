@@ -266,10 +266,7 @@ NO uses emojis excesivos. Sé natural y humano."""
 @rate_limit
 def chat_havi():
     data = request.get_json() or {}
-    print("=" * 50)
-    print("📥 PAYLOAD RECIBIDO:", data)
-    print("=" * 50)
-    uid = str(data.get('user_id', ''))
+    uid = str(data.get('user_id', '')).strip().upper()
     user_message = data.get('mensaje', '').strip()
 
     if not uid or not user_message:
@@ -279,35 +276,88 @@ def chat_havi():
     if not perfil:
         return jsonify({"error": "Usuario no encontrado"}), 404
 
-    cluster = perfil.get('cluster', 4)
+    # ✅ USAR CLUSTER_ID (no 'cluster')
+    cluster = perfil.get('cluster_id', 4)
     config = CLUSTER_CONFIG.get(cluster, CLUSTER_CONFIG[4])
 
-    # Historial truncado a últimos 4 turnos
-    historial = ""
+    # ✅ EXTRAER DATOS REALES
+    edad = perfil.get('edad', 'N/D')
+    sexo = perfil.get('sexo', '')
+    ciudad = perfil.get('ciudad', 'México')
+    ocupacion = perfil.get('ocupacion', 'N/D')
+    ingreso = perfil.get('ingreso_mensual_mxn', 0)
+    saldo = perfil.get('saldo_total_productos', 0)
+    limite_credito = perfil.get('limite_credito_total', 0)
+    utilizacion = perfil.get('utilizacion_promedio', 0)
+    deuda_estimada = limite_credito * utilizacion
+    score_buro = perfil.get('score_buro', 'N/D')
+    es_hey_pro = perfil.get('es_hey_pro', False)
+    tiene_seguro = perfil.get('tiene_seguro', False)
+    productos_activos = perfil.get('num_productos_activos', 0)
+    perfil_negocio = perfil.get('perfil_negocio', '')
+    insight_trans = perfil.get('insight_transaccional', '')
+    categoria_top = perfil.get('categoria_principal', 'N/D')
+    cashback = perfil.get('cashback_total', 0)
+    satisfaccion = perfil.get('satisfaccion_1_10', 'N/D')
+    dias_inactivo = perfil.get('dias_desde_ultima_transaccion', 0)
+    
+    # Forma de tratamiento (sin nombre real)
+    saludo_genero = "" 
+    if sexo == "M": saludo_genero = "cliente"
+    elif sexo == "H": saludo_genero = "cliente"
+    else: saludo_genero = "cliente"
+
+    # Historial
+    historial_txt = ""
     for turno in list(memoria[uid])[-4:]:
         actor = "Usuario" if turno["rol"] == "user" else "HaviEr"
-        historial += f"{actor}: {turno['msg']}\n"
+        historial_txt += f"{actor}: {turno['msg']}\n"
 
-    prompt = f"""Eres HaviEr, asistente financiero de Hey Banco.
+    prompt = f"""Eres HaviEr, asistente financiero virtual de Hey Banco. Hablas en español mexicano, eres breve (máx 3 líneas), cálido, claro y útil. NUNCA inventes datos.
 
-PERFIL DEL CLIENTE:
-- Nombre: {perfil.get('nombre', 'Cliente')}
-- Segmento: {config['nombre']}
+═══ DATOS REALES DEL CLIENTE (úsalos textualmente, no los inventes) ═══
+- ID: {uid}
+- Edad: {edad} años | Ciudad: {ciudad} | Ocupación: {ocupacion}
+- Ingreso mensual: ${ingreso:,.0f} MXN
+- Saldo total en productos: ${saldo:,.2f} MXN
+- Línea de crédito total: ${limite_credito:,.0f} MXN
+- Utilización de crédito: {utilizacion*100:.1f}%
+- Deuda estimada: ${deuda_estimada:,.0f} MXN
+- Score de buró: {score_buro}
+- Hey Pro: {"Sí" if es_hey_pro else "No"} | Seguro: {"Sí" if tiene_seguro else "No"}
+- Productos activos: {productos_activos}
+- Cashback acumulado: ${cashback:,.2f} MXN
+- Categoría top de gasto: {categoria_top}
+- Días desde última transacción: {dias_inactivo}
+- Satisfacción autoreportada: {satisfaccion}/10
+
+═══ SEGMENTACIÓN ═══
+- Cluster: {config['nombre']}
+- Perfil de negocio: {perfil_negocio}
+- Insight transaccional: {insight_trans}
 - Tono recomendado: {config['tono']}
-- Ofertas relevantes: {', '.join(config['ofertas'])}
+- Productos relevantes para ofrecer: {', '.join(config['ofertas'])}
 
-HISTORIAL RECIENTE:
-{historial}
+═══ HISTORIAL DE LA CONVERSACIÓN ═══
+{historial_txt if historial_txt else "(Primera interacción del día)"}
 
-MENSAJE ACTUAL:
-Usuario: {user_message}
+═══ MENSAJE DEL USUARIO ═══
+"{user_message}"
 
-Responde de forma BREVE (máx 4 líneas), natural y útil. Si es relevante, sugiere sutilmente una oferta. NO repitas saludos si ya hubo conversación previa."""
+═══ REGLAS ESTRICTAS ═══
+1. NUNCA uses placeholders como [Cantidad], [Nombre], [Saldo]. Usa los números reales de arriba.
+2. Si no tienes el nombre, dirígete como "{saludo_genero}" o sin saludo si ya hubo conversación.
+3. Si el usuario pregunta por su saldo, dale el número real: ${saldo:,.2f}.
+4. Si pregunta por su deuda o crédito, usa los datos reales de arriba.
+5. NO repitas saludos si el historial ya muestra interacción.
+6. Si sugieres una oferta, hazlo natural y al final, no fuerces venta.
+7. Responde SOLO el mensaje al usuario. Nada de meta-comentarios ni etiquetas."""
 
     texto, error = llamar_gemini(prompt, temperatura=0.7)
     if error:
         return jsonify({"error": error[0]}), error[1]
 
+    # Guardar memoria
     memoria[uid].append({"rol": "user", "msg": user_message})
     memoria[uid].append({"rol": "havi", "msg": texto})
     log_interaccion(uid, "chat", user_message, texto)
@@ -317,6 +367,7 @@ Responde de forma BREVE (máx 4 líneas), natural y útil. Si es relevante, sugi
         "cluster": cluster,
         "cluster_nombre": config["nombre"]
     })
+
 
 
 # ============================================================
@@ -456,3 +507,14 @@ def reset_memoria():
 if __name__ == '__main__':
     port = int(os.getenv("PORT", 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
+
+@app.route("/api/cliente/<user_id>", methods=["GET"])
+def get_cliente(user_id):
+    cliente = next((c for c in clientes_data if c["user_id"] == user_id), None)
+    if not cliente:
+        return jsonify({"error": "Cliente no encontrado"}), 404
+    return jsonify({
+        "user_id": cliente["user_id"],
+        "cluster": cliente.get("cluster_name", "N/A"),
+        "edad": cliente.get("edad", "N/A")
+    })
