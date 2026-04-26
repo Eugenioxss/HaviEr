@@ -1,0 +1,76 @@
+============================================================
+ITERATION 17 - TOP 16 GENERIC STOPWORDS (+ tengo)
+============================================================
+
+Stopwords removed: ['de', 'mi', 'no', 'la', 'me', 'que', 'el', 'en', 'un', 'a', 'como', 'y', 'para', 'con', 'si', 'tengo']
+Stopwords kept: ['tarjeta', 'credito', 'cuenta'] + all banking terms
+
+Parameters:
+  - TF-IDF max_features: 5000
+  - TF-IDF ngram_range: (1, 2)
+  - TF-IDF stop_words: 16 generic words
+  - UMAP n_neighbors: 20
+  - UMAP min_dist: 0.05
+  - HDBSCAN min_cluster_size: 100
+  - HDBSCAN min_samples: 15
+
+Clusters found: 54
+Noise points: 6086 (25.2%)
+Silhouette score: 0.626
+Clustered: 18033/24119 (74.8%)
+
+Cluster sizes:
+  Cluster 0: 275 (1.1%)
+  Cluster 1: 105 (0.4%)
+  Cluster 2: 240 (1.0%)
+  Cluster 3: 324 (1.3%)
+  Cluster 4: 105 (0.4%)
+  Cluster 5: 172 (0.7%)
+  Cluster 6: 1209 (5.0%)
+  Cluster 7: 101 (0.4%)
+  Cluster 8: 142 (0.6%)
+  Cluster 9: 186 (0.8%)
+  Cluster 10: 495 (2.1%)
+  Cluster 11: 125 (0.5%)
+  Cluster 12: 239 (1.0%)
+  Cluster 13: 106 (0.4%)
+  Cluster 14: 182 (0.8%)
+  Cluster 15: 143 (0.6%)
+  Cluster 16: 283 (1.2%)
+  Cluster 17: 225 (0.9%)
+  Cluster 18: 172 (0.7%)
+  Cluster 19: 274 (1.1%)
+  Cluster 20: 223 (0.9%)
+  Cluster 21: 105 (0.4%)
+  Cluster 22: 169 (0.7%)
+  Cluster 23: 154 (0.6%)
+  Cluster 24: 199 (0.8%)
+  Cluster 25: 123 (0.5%)
+  Cluster 26: 363 (1.5%)
+  Cluster 27: 470 (1.9%)
+  Cluster 28: 402 (1.7%)
+  Cluster 29: 221 (0.9%)
+  Cluster 30: 112 (0.5%)
+  Cluster 31: 351 (1.5%)
+  Cluster 32: 560 (2.3%)
+  Cluster 33: 304 (1.3%)
+  Cluster 34: 264 (1.1%)
+  Cluster 35: 106 (0.4%)
+  Cluster 36: 3854 (16.0%)
+  Cluster 37: 313 (1.3%)
+  Cluster 38: 299 (1.2%)
+  Cluster 39: 121 (0.5%)
+  Cluster 40: 114 (0.5%)
+  Cluster 41: 1092 (4.5%)
+  Cluster 42: 665 (2.8%)
+  Cluster 43: 133 (0.6%)
+  Cluster 44: 101 (0.4%)
+  Cluster 45: 228 (0.9%)
+  Cluster 46: 183 (0.8%)
+  Cluster 47: 201 (0.8%)
+  Cluster 48: 393 (1.6%)
+  Cluster 49: 309 (1.3%)
+  Cluster 50: 127 (0.5%)
+  Cluster 51: 245 (1.0%)
+  Cluster 52: 292 (1.2%)
+  Cluster 53: 134 (0.6%)

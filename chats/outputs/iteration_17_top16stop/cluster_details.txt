@@ -1,0 +1,220 @@
+============================================================
+CLUSTER DETAILS - ITERATION 17 (Top-16 Generic Stopwords)
+============================================================
+
+Cluster 0 (n=275):
+  Top terms: ['gracias', 'todo', 'es todo', 'muchas gracias', 'muchas', 'todo gracias', 'es', 'sería todo', 'ok muchas', 'sería']
+  Sample: gracias
+
+Cluster 1 (n=105):
+  Top terms: ['atención clientes', 'clientes', 'atención', 'número atención', 'número', 'teléfono atención', 'teléfono', 'dame', 'clientes por', 'dame teléfono']
+  Sample: número atención a clientes
+
+Cluster 2 (n=240):
+  Top terms: ['cargo', 'reconocido', 'cargo reconocido', 'reconozco', 'reconozco cargo', 'cargo reconozco', 'aclaración cargo', 'aclaración', 'reconocido tarjeta', 'reporto cargo']
+  Sample: cargo no reconocido
+
+Cluster 3 (n=324):
+  Top terms: ['hola', 'hola buena', 'buena', 'buena tarde', 'tal', 'tarde', 'solicité', 'pagos', 'pero', 'aparece']
+  Sample: hola
+
+Cluster 4 (n=105):
+  Top terms: ['eliminar', 'eliminar cuenta', 'cuenta', 'puedo eliminar', 'programar', 'quiero eliminar', 'cómo eliminar', 'cómo', 'eliminar cuentas', 'cuentas']
+  Sample: como eliminar mi cuenta
+
+Cluster 5 (n=172):
+  Top terms: ['token', 'cómo cancelar', 'quiero crédito', 'crédito', 'cancelar', 'cómo', 'quiero', 'cancelar cuenta', 'crédito negocio', 'cancelar tarjeta']
+  Sample: no encuentro codi en mi apo
+
+Cluster 6 (n=1209):
+  Top terms: ['número', 'atención', 'cliente', 'al cliente', 'clientes', 'al', 'teléfono', 'atención clientes', 'hablar', 'servicio']
+  Sample: atención a clientes
+
+Cluster 7 (n=101):
+  Top terms: ['hablar asesor', 'asesor', 'hablar', 'solicito', 'numero', 'tel', 'cómo', 'whatsapp', 'ocupo', 'ago']
+  Sample: hablar con un asesor
+
+Cluster 8 (n=142):
+  Top terms: ['hablar', 'quiero hablar', 'hablar asesor', 'asesor', 'quiero', 'necesito hablar', 'necesito', 'hablar ejecutivo', 'ejecutivo', 'buen dia']
+  Sample: quiero hablar con un asesor
+
+Cluster 9 (n=186):
+  Top terms: ['nip', 'fan', 'ser', 'cancelo', 'ser hey', 'pro', 'fan shop', 'hey pro', 'hey', 'shop']
+  Sample: nip
+
+Cluster 10 (n=495):
+  Top terms: ['apple', 'pay', 'apple pay', 'wallet', 'verificar', 'tarjeta apple', 'tarjeta', 'verificar tarjeta', 'agregar', 'cómo']
+  Sample: no me aparece la opción de agregar tarjeta wallet
+
+Cluster 11 (n=125):
+  Top terms: ['activar', 'activar tarjeta', 'movil', 'token movil', 'puedo activar', 'token', 'tarjeta', 'activar token', 'cómo activar', 'cómo']
+  Sample: al activar la tarjeta de débito queda activa la de crédito
+
+Cluster 12 (n=239):
+  Top terms: ['token', 'token es', 'incorrecto', 'correcto', 'es', 'es correcto', 'dice', 'dice token', 'es incorrecto', 'token incorrecto']
+  Sample: quiero pagar mi tarjeta pero dice que no es correcto el token
+
+Cluster 13 (n=106):
+  Top terms: ['retiro sin', 'retiro', 'sin tarjeta', 'sin', 'tarjeta', 'hacer retiro', 'hacer', 'puedo hacer', 'cajero', 'puedo']
+  Sample: si tengo bloqueada mi tarjeta física puedo recibir depósitos y retirar en cajero
+
+Cluster 14 (n=182):
+  Top terms: ['buenas', 'nómina', 'buenas tardes', 'tardes', 'portabilidad nómina', 'portabilidad', 'buen día', 'día', 'buen', 'hola buenas']
+  Sample: buenas tardes manejan afores
+
+Cluster 15 (n=143):
+  Top terms: ['pal norte', 'pal', 'norte', 'tarjeta pal', 'tarjeta', 'tecate', 'tecate pal', 'edición', 'beneficios', 'edición pal']
+  Sample: beneficios en tecate pal norte
+
+Cluster 16 (n=283):
+  Top terms: ['meses', '000', 'enganche', '60', '48', '36', 'mil', '48 meses', '60 meses', '36 meses']
+  Sample: daría un enganche de 100 mil pesos el auto cuesta 400 mil
+
+Cluster 17 (n=225):
+  Top terms: ['estado cuenta', 'estado', 'cuenta', 'descargar', 'descargar estado', 'puedo descargar', 'puedo', 'saco', 'necesito estado', 'donde saco']
+  Sample: cómo puedo obtener mi último estado de cuenta
+
+Cluster 18 (n=172):
+  Top terms: ['meses sin', 'sin intereses', 'pro', 'intereses', 'hey pro', 'meses', 'sin', 'diferir', 'hey', 'puedo diferir']
+  Sample: en que parte de la aplicacion puedo diferir mis compras
+
+Cluster 19 (n=274):
+  Top terms: ['es', 'cual es', 'cuál', 'cual', 'cuál es', 'es número', 'es token', 'número', 'token', 'contrato']
+  Sample: en el kiosko cuál es el precio de los productos
+
+Cluster 20 (n=223):
+  Top terms: ['cancelar', 'puedo cancelar', 'cancelar una', 'una', 'puedo', 'cancelar cuenta', 'transferencia', 'cómo', 'cómo puedo', 'una transferencia']
+  Sample: no puedo cancelar el fondo de inversión nafindx
+
+Cluster 21 (n=105):
+  Top terms: ['opción', 'aparece opción', 'aparece', 'sale opción', 'sale', 'perfil', 'reconozco este', 'este cargo', 'cargo', 'reconozco']
+  Sample: ya desinstale la app la volví a instalar y no me sale la opción de codi
+
+Cluster 22 (n=169):
+  Top terms: ['crédito auto', 'auto', 'crédito', 'auto hey', 'del crédito', 'requisitos crédito', 'requisitos', 'del', 'sobre crédito', 'hey']
+  Sample: monto de crédito de auto hey
+
+Cluster 23 (n=154):
+  Top terms: ['préstamo', 'préstamo personal', 'personal', 'auto', 'liquidar', 'interesa', 'liquidar crédito', 'quiero', 'solicitar préstamo', 'quiero préstamo']
+  Sample: si liquido mi préstamo personal puedo volver a pedirlo
+
+Cluster 24 (n=199):
+  Top terms: ['seguro', 'auto', 'seguro auto', 'póliza', 'credito auto', 'póliza seguro', 'credito', 'moto', 'información', 'quiero']
+  Sample: hola me interesa un credito de auto
+
+Cluster 25 (n=123):
+  Top terms: ['encuentro', 'donde encuentro', 'dónde encuentro', 'donde', 'encuentro token', 'dónde', 'donde esta', 'token', 'esta', 'encuentro nip']
+  Sample: dónde encuentro mi token
+
+Cluster 26 (n=363):
+  Top terms: ['clabe', 'cuenta', 'cuenta clabe', 'clave', 'número cuenta', 'número', 'cuenta clave', 'cambio', 'ver', 'interbancaria']
+  Sample: una cuenta clabe para realizar el pago de mi tarjeta y se vea reflejado
+
+Cluster 27 (n=470):
+  Top terms: ['cambiar', 'tarjeta', 'puedo cambiar', 'tarjeta virtual', 'virtual', 'puedo', 'tarjeta digital', 'dónde está', 'digital', 'está']
+  Sample: donde está el token
+
+Cluster 28 (n=402):
+  Top terms: ['ver', 'puedo ver', 'puedo', 'mis', 'dónde', 'dónde puedo', 'mis apartados', 'donde', 'apartados', 'ver mis']
+  Sample: porque no puedo ver mi estado de cuenta del crédito que debo
+
+Cluster 29 (n=221):
+  Top terms: ['clave', 'veo', 'clave rastreo', 'clave interbancaria', 'rastreo', 'interbancaria', 'donde veo', 'veo token', 'donde', 'dónde veo']
+  Sample: clave interbancaria
+
+Cluster 30 (n=112):
+  Top terms: ['fecha', 'corte', 'fecha corte', 'pago', 'deuda', 'es', 'mes', 'cuando es', 'deuda tarjeta', 'este mes']
+  Sample: cual es mi pago de este mes
+
+Cluster 31 (n=351):
+  Top terms: ['reportar', 'movimiento', 'reconocido', 'reportar cargo', 'cargo', 'quiero reportar', 'puedo reportar', 'reporte', 'cobro', 'tarjeta']
+  Sample: no reconozco un movimiento
+
+Cluster 32 (n=560):
+  Top terms: ['pagar', 'puedo pagar', 'recarga', 'puedo', 'se puede', 'puede', 'se', 'sat', 'aire', 'tiempo aire']
+  Sample: a 18 y si se puede 24
+
+Cluster 33 (n=304):
+  Top terms: ['anualidad', 'tarjeta', 'funciona', 'cashback', 'activo', 'debito', 'tiene', 'crédito', 'tarjeta crédito', 'beneficios']
+  Sample: que beneficios tiene tener mi nomina en hey
+
+Cluster 34 (n=264):
+  Top terms: ['cuenta', 'una cuenta', 'menores', 'cuenta hey', 'una', 'hey', 'deja', 'cuenta menores', 'validar', 'abrir']
+  Sample: edad mínima para una cuenta hey menores
+
+Cluster 35 (n=106):
+  Top terms: ['por qué', 'qué', 'por', 'pago tarjeta', 'pago', 'cobran', 'tarjeta', 'crédito', 'tarjeta crédito', 'cómo pago']
+  Sample: por whats app me puedo comunicar
+
+Cluster 36 (n=3854):
+  Top terms: ['ya', 'por', 'pero', 'es', 'se', 'tarjeta', 'una', 'cuenta', 'los', 'puedo']
+  Sample: porque al depositarme aparace que no existe
+
+Cluster 37 (n=313):
+  Top terms: ['lo', 'cuenta', 'cargos', 'promociones', 'tarjetas', 'problema', 'reconozco', 'ya', 'tienen', 'se']
+  Sample: tienen código de recomendación para mis conocidos
+
+Cluster 38 (n=299):
+  Top terms: ['bloqueada', 'está', 'tarjeta', 'está bloqueada', 'cómo se', 'se', 'cómo', 'cuenta', 'esta', 'tarjeta está']
+  Sample: hola no se si mi tarjeta está prendida
+
+Cluster 39 (n=121):
+  Top terms: ['crédito garantía', 'garantía', 'tarjeta crédito', 'crédito', 'tarjeta', 'crédito garantizada', 'garantizada', 'cancelar tarjeta', 'cancelar', 'cómo cancelar']
+  Sample: cómo puedo tramitar la tarjeta de crédito garantizada
+
+Cluster 40 (n=114):
+  Top terms: ['limite', 'transferencias', 'es limite', 'es', 'aumentar limite', 'cuanto es', 'aumentar', 'limite credito', 'limite depositos', 'depositos']
+  Sample: cual es mi limite de gastos diarios en mi tarjeta de credito hey
+
+Cluster 41 (n=1092):
+  Top terms: ['tarjeta', 'solicitar', 'física', 'tarjeta física', 'una', 'reposición', 'una tarjeta', 'débito', 'solicitar tarjeta', 'puedo']
+  Sample: ya inicio todo el proceso de mi tarjeta física
+
+Cluster 42 (n=665):
+  Top terms: ['tarjeta', 'tarjeta crédito', 'crédito', 'credito', 'tarjeta credito', 'saldo', 'aparece', 'linea', 'cancelar', 'quiero cancelar']
+  Sample: la tarjeta de crédito hey negocios es diferente de la tdc normal
+
+Cluster 43 (n=133):
+  Top terms: ['saber', 'quiero saber', 'puedo saber', 'quiero', 'saber nip', 'cómo', 'cómo saber', 'puedo', 'nip', 'cómo puedo']
+  Sample: como saber mi crédito
+
+Cluster 44 (n=101):
+  Top terms: ['línea crédito', 'línea', 'crédito', 'aumentar', 'aumentar línea', 'incremento', 'crédito tarjeta', 'una línea', 'incrementar', 'puedo aumentar']
+  Sample: aumenta mi línea de crédito para deposito
+
+Cluster 45 (n=228):
+  Top terms: ['límite', 'es límite', 'límite crédito', 'es', 'cuál es', 'cuál', 'límite transferencia', 'límite depósitos', 'aumentar límite', 'depósitos']
+  Sample: dónde ver el límite de depósito
+
+Cluster 46 (n=183):
+  Top terms: ['transferir', 'otro banco', 'puedo transferir', 'otro', 'deuda', 'banco', 'transferir deuda', 'puedo', 'otra', 'deuda otro']
+  Sample: quiero transferir deuda
+
+Cluster 47 (n=201):
+  Top terms: ['banco', 'hey banco', 'hey', 'es', 'banregio', 'banco es', 'qué banco', 'independiente', 'qué', 'es banregio']
+  Sample: deuda de otros bancos hey banco
+
+Cluster 48 (n=393):
+  Top terms: ['hacer', 'una', 'puedo hacer', 'aclaración', 'hacer una', 'compra', 'una aclaración', 'puedo', 'una compra', 'quiero hacer']
+  Sample: necesito meter una aclaración
+
+Cluster 49 (n=309):
+  Top terms: ['retirar', 'puedo retirar', 'puedo', 'cajeros', 'efectivo', 'sin', 'dinero', 'retirar dinero', 'cajeros puedo', 'retirar efectivo']
+  Sample: cajeros sin costo
+
+Cluster 50 (n=127):
+  Top terms: ['depositar', 'puedo depositar', 'puedo', 'oxxo', 'depositar oxxo', 'depositar efectivo', 'pueden depositar', 'efectivo', 'pueden', 'donde puedo']
+  Sample: dónde me pueden depositar
+
+Cluster 51 (n=245):
+  Top terms: ['recibir', 'puedo recibir', 'dinero', 'puedo', 'estados', 'estados unidos', 'unidos', 'recibir dinero', 'puedo realizar', 'dinero estados']
+  Sample: si tengo la tarjeta bloqueada puedo recibir transferencias
+
+Cluster 52 (n=292):
+  Top terms: ['una transferencia', 'transferencia', 'una', 'refleja', 'se refleja', 'llegado', 'hice una', 'hice', 'se', 'ha']
+  Sample: tengo problemas con una transferencia
+
+Cluster 53 (n=134):
+  Top terms: ['tarda', 'cuánto', 'tiempo', 'cuánto tarda', 'tiempo tarda', 'cuánto tiempo', 'cuanto', 'reflejarse', 'tarda reflejarse', 'cuanto tiempo']
+  Sample: después de contratar un crédito personal cuánto tiempo después se puede liquidar
+
