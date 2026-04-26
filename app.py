@@ -266,6 +266,9 @@ NO uses emojis excesivos. Sé natural y humano."""
 @rate_limit
 def chat_havi():
     data = request.get_json() or {}
+    print("=" * 50)
+    print("📥 PAYLOAD RECIBIDO:", data)
+    print("=" * 50)
     uid = str(data.get('user_id', ''))
     user_message = data.get('mensaje', '').strip()
 
