@@ -1,5 +1,7 @@
 # Changelog - TF-IDF Clustering Iterations
 
+> results changelog for code iterations. stops at 11 
+
 ## Iteration History
 
 | Iteration | File | HDBSCAN Params | UMAP n_neighbors | Date | Clusters | Silhouette |
@@ -15,7 +17,8 @@
 | 9 | `iteration_9_stopwords.py` | min_cluster_size=100, min_samples=15 | **20** | 2026-04-26 | 54 | 0.591 |
 | 10 | `iteration_10_top10.py` | min_cluster_size=100, min_samples=15 | **20** | 2026-04-26 | 55 | 0.585 |
 | 11 | `iteration_11_notarjeta.py` | min_cluster_size=100, min_samples=15 | **20** | 2026-04-26 | **60** | **0.601** |
-
+| 12 | `iteration_17_16stopwords.py` | min_cluster_size=100, min_samples=15 | **20** | 2026-04-26 | **60** | **0.601** |
+> iteration #17 offered best results and was renamed for clarity.
 ---
 
 ## Iteration 1 → Iteration 2

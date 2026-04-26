@@ -1,4 +1,5 @@
 # UMAP analysis
+> these were the initial instructions for the coding agent to develop UMAP analysis. Followups and development process are continued in @agent-session-history.md
 
 ## Objective
 - Develop a classification system based in UMAP for customer interactions as per chat data.

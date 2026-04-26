@@ -1,4 +1,5 @@
 # Setup
+> general instructions for base stack and agent basic behavior.
 
 ## Objective
 Analyze chatbot conversation databases (customer service for financial products) using performance-aware techniques, optimizing costs and flexibility

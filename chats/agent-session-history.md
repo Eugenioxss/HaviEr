@@ -4,6 +4,7 @@
 **Created:** 4/26/2026, 1:12:30 AM
 **Updated:** 4/26/2026, 6:10:12 AM
 
+> session is incomplete as per context compression/cutoff.
 ---
 
 ## User
@@ -1832,4 +1833,3 @@ go
 - **5%** charge disputes (churn risk)
 
 ---
-
