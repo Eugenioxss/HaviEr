@@ -1,567 +1,452 @@
-import os, json, logging, time
+import os
+import json
+import logging
+import time
+import gc
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from google import genai
 from google.genai import types
-from google.genai import errors as genai_errors  # 🆕 Para manejar quota
+from google.genai import errors as genai_errors
 from collections import defaultdict, deque
 from datetime import datetime
+from functools import wraps
 
+# ============================================================
+# CONFIGURACIÓN INICIAL
+# ============================================================
 load_dotenv()
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
 
-# --- VALIDACIÓN AL ARRANCAR ---
 API_KEY = os.getenv("GEMINI_API_KEY")
 if not API_KEY:
     raise RuntimeError("❌ FALTA GEMINI_API_KEY en el .env")
 
 app = Flask(__name__)
-CORS(app)
+
+# CORS restringido por variable de entorno
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+CORS(app, origins=ALLOWED_ORIGINS)
+
 client = genai.Client(api_key=API_KEY)
+MODEL_NAME = "gemini-2.5-flash-lite"
 
-# --- MEMORIA CONVERSACIONAL (en RAM, últimos 6 turnos por usuario) ---
+# ============================================================
+# ESTADO EN RAM
+# ============================================================
 memoria = defaultdict(lambda: deque(maxlen=6))
-
-# 🆕 USUARIOS CREADOS VÍA /api/signup (no están en el JSON)
 USUARIOS_NUEVOS = {}
+INTERACCIONES_LOG = deque(maxlen=500)
+RATE_LIMIT = defaultdict(list)
+MAX_REQ_PER_MIN = 15
 
-# --- CARGA DE DATOS ---
+# ============================================================
+# CARGA DE DATOS (con liberación de memoria)
+# ============================================================
 db_clientes = {}
 try:
     with open('clientes_etiquetados.json', 'r', encoding='utf-8') as f:
         clientes_data = json.load(f)
-        db_clientes = {str(c.get('user_id', '')): c for c in clientes_data if c.get('user_id')}
+        db_clientes = {
+            str(c.get('user_id', '')): c
+            for c in clientes_data if c.get('user_id')
+        }
+    del clientes_data
+    gc.collect()
     logging.info(f"✅ Cerebro cargado: {len(db_clientes)} perfiles 360°")
 except Exception as e:
     logging.error(f"❌ Error cargando JSON: {e}")
 
-
 # ============================================================
-# 🆕 ESTRATEGIAS POR CLUSTER DEC
+# CONFIGURACIÓN DE CLUSTERS (DEC)
 # ============================================================
-CLUSTER_DEC_STRATEGIES = {
+CLUSTER_CONFIG = {
     0: {
-        "nombre": "El Fantasma",
-        "tono": "directo, urgente, con incentivo fuerte",
-        "ofrecer": ["bono de reactivación $300", "tarjeta sin anualidad", "cashback inmediato"],
-        "evitar": ["productos complejos", "inversiones", "lenguaje formal"],
-        "trigger": "necesita un motivo poderoso para volver a usar Hey"
+        "nombre": "The Ghost",
+        "tono": "Cercano, motivacional, paciente",
+        "ofertas": ["Activación de cuenta", "Primer producto sin comisiones"],
+        "trigger": "Inactividad prolongada"
     },
     1: {
-        "nombre": "Mainstream Activo",
-        "tono": "cercano, fresco, motivacional",
-        "ofrecer": ["cashback en categorías favoritas", "metas de ahorro", "tarjetas premium"],
-        "evitar": ["asustarlo con riesgos", "ofertas de crédito agresivas"],
-        "trigger": "engagement diario, gamificación de hábitos"
+        "nombre": "Mainstream Active",
+        "tono": "Amigable, directo, práctico",
+        "ofertas": ["Tarjeta de crédito", "Inversión básica", "Cashback"],
+        "trigger": "Uso recurrente, oportunidad de upsell"
     },
     2: {
-        "nombre": "Apalancado Ambicioso",
-        "tono": "estratégico, retador, mentor financiero",
-        "ofrecer": ["optimización de score", "co-piloto de crédito", "consolidación de deudas"],
-        "evitar": ["sermonearlo", "tono paternalista"],
-        "trigger": "quiere crecer su capacidad financiera, no que le digan que no"
+        "nombre": "Leveraged Ambitious",
+        "tono": "Estratégico, educativo, advertencia financiera",
+        "ofertas": ["Consolidación de deuda", "Asesoría financiera", "Refinanciamiento"],
+        "trigger": "Alto endeudamiento, riesgo crediticio"
     },
     3: {
-        "nombre": "Premium Saludable",
-        "tono": "sofisticado, asesor wealth, exclusivo",
-        "ofrecer": ["inversiones", "seguros patrimoniales", "VIP status", "asesoría premium"],
-        "evitar": ["promociones masivas", "lenguaje básico"],
-        "trigger": "busca optimizar patrimonio y reconocimiento"
+        "nombre": "Premium Healthy",
+        "tono": "Sofisticado, exclusivo, consultor",
+        "ofertas": ["Inversiones premium", "Tarjeta Black", "Patrimonio"],
+        "trigger": "Alto poder adquisitivo, salud financiera"
     },
     4: {
-        "nombre": "Tibio",
-        "tono": "empático, indagador, generador de conexión",
-        "ofrecer": ["personalización", "encuestas cortas", "primer producto adicional"],
-        "evitar": ["bombardearlo con productos", "spam"],
-        "trigger": "está a punto de churnear, hay que entender por qué"
+        "nombre": "The Lukewarm",
+        "tono": "Curioso, retador, gamificado",
+        "ofertas": ["Retos de ahorro", "Promociones limitadas", "Productos novedosos"],
+        "trigger": "Engagement medio, potencial de activación"
     }
 }
 
-
 # ============================================================
-# 🧠 PRE-PROCESADOR DE INSIGHTS (cliente existente)
+# UTILIDADES
 # ============================================================
-def construir_ficha_inteligente(c: dict) -> str:
-    """Convierte el JSON crudo en un brief accionable para la IA."""
-    
-    alertas = []
-    oportunidades = []
-    
-    if c.get('score_buro', 850) < 600:
-        alertas.append(f"🚨 Score buró BAJO: {c.get('score_buro')} (riesgo impago)")
-    
-    util = c.get('utilizacion_promedio', 0)
-    if util > 0.7:
-        alertas.append(f"🚨 Usa {util*100:.0f}% de su crédito (saturado)")
-    elif util > 0.3:
-        alertas.append(f"⚠️ Usa {util*100:.0f}% de su crédito")
-    
-    dias_inactivo = c.get('dias_desde_ultima_transaccion', 0)
-    if dias_inactivo > 15:
-        alertas.append(f"⚠️ {dias_inactivo} días sin transaccionar")
-    
-    var = c.get('variacion_actividad', 0)
-    if var < -0.3:
-        alertas.append(f"📉 Actividad cayó {abs(var)*100:.0f}% vs mes pasado")
-    
-    if not c.get('tiene_seguro'):
-        oportunidades.append("Sin seguro contratado")
-    if not c.get('nomina_domiciliada'):
-        oportunidades.append("Nómina NO domiciliada")
-    if c.get('nivel_oportunidad_transaccional') == 'Alto':
-        oportunidades.append("Alto potencial comercial")
-    if c.get('cashback_total', 0) < 200:
-        oportunidades.append("Bajo aprovechamiento de cashback")
-    
-    ficha = f"""
-PERFIL DEC: {c.get('perfil_negocio', 'N/D')}
-DEMOGRAFÍA: {c.get('edad')} años, {c.get('sexo')}, {c.get('ciudad')}, ingreso ${c.get('ingreso_mensual_mxn'):,} MXN/mes
-SATISFACCIÓN: {c.get('satisfaccion_1_10')}/10 | Antigüedad: {c.get('antiguedad_dias')} días
-PRODUCTOS: {c.get('num_productos_activos')} activos (principal: {c.get('producto_principal')})
-SALDO TOTAL: ${c.get('saldo_total_productos', 0):,.0f} | Límite crédito: ${c.get('limite_credito_total', 0):,.0f}
-HÁBITOS: Canal favorito {c.get('canal_principal')}, gasta principalmente en {c.get('categoria_principal')}
-INSIGHT IA: {c.get('insight_transaccional', 'N/D')}
-
-🚨 ALERTAS: {' | '.join(alertas) if alertas else 'Ninguna'}
-💡 OPORTUNIDADES: {' | '.join(oportunidades) if oportunidades else 'Ninguna'}
-"""
-    return ficha.strip()
+def rate_limit(f):
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        ip = request.remote_addr or "unknown"
+        ahora = time.time()
+        RATE_LIMIT[ip] = [t for t in RATE_LIMIT[ip] if ahora - t < 60]
+        if len(RATE_LIMIT[ip]) >= MAX_REQ_PER_MIN:
+            return jsonify({"error": "Demasiadas peticiones, espera un momento"}), 429
+        RATE_LIMIT[ip].append(ahora)
+        return f(*args, **kwargs)
+    return wrapper
 
 
-# ============================================================
-# 🆕 FICHA PARA USUARIO NUEVO (sin historial transaccional)
-# ============================================================
-def construir_ficha_usuario_nuevo(perfil: dict) -> str:
-    return f"""
-PERFIL DEC ASIGNADO POR SIMILITUD: {perfil['cluster_nombre']}
-👤 NUEVO USUARIO (Día 1, sin historial transaccional aún)
-
-DEMOGRAFÍA: {perfil['edad']} años, {perfil['ciudad']}, {perfil['estado']}
-INGRESO DECLARADO: ${perfil['ingreso_mensual']:,} MXN/mes
-PATRIMONIO ESTIMADO: ${int(perfil['patrimonio_estimado']):,} MXN
-
-INTENCIÓN:
-- Producto que más le interesa: {perfil['producto_interes']}
-- Frecuencia transaccional esperada: {perfil['frecuencia_tx']}
-- Productos en otros bancos: {perfil['num_productos']}
-- Apertura a recomendaciones: {perfil['interes_recomendaciones']}/10
-
-⚠️ NO asumas historial. Aprovecha para construir confianza y entender sus metas.
-""".strip()
+def log_interaccion(uid, tipo, mensaje_user="", respuesta_havi=""):
+    INTERACCIONES_LOG.append({
+        "timestamp": datetime.now().isoformat(),
+        "user_id": uid,
+        "tipo": tipo,
+        "mensaje_user": mensaje_user[:200],
+        "respuesta_havi": respuesta_havi[:200],
+        "es_nuevo": uid in USUARIOS_NUEVOS
+    })
 
 
-# ============================================================
-# ✏️ SYSTEM INSTRUCTION (ahora con estrategia de cluster)
-# ============================================================
-def construir_system_prompt(ficha: str, cluster_id: int = None) -> str:
-    """Si se pasa cluster_id, inyecta la estrategia DEC."""
-    
-    estrategia_extra = ""
-    if cluster_id is not None and cluster_id in CLUSTER_DEC_STRATEGIES:
-        e = CLUSTER_DEC_STRATEGIES[cluster_id]
-        estrategia_extra = f"""
+def clasificar_nuevo_usuario(data):
+    """Heurística ponderada para asignar cluster a usuarios nuevos."""
+    edad = data['edad']
+    ingreso = data['ingreso_mensual']
+    productos = data['num_productos']
+    interes = data['interes_recomendaciones']
 
-🎯 ESTRATEGIA DE SEGMENTO ({e['nombre']}):
-- Tono recomendado: {e['tono']}
-- Productos a priorizar: {', '.join(e['ofrecer'])}
-- EVITAR: {', '.join(e['evitar'])}
-- Insight clave: {e['trigger']}
-"""
-    
-    return f"""Eres HaviEr, la inteligencia proactiva y empática de Hey Banco.
-
-REGLAS DE ORO:
-1. NO te presentes, ve directo al grano.
-2. Máximo 2-3 oraciones. Tono regio, cálido, futurista.
-3. NO recites números crudos. Tradúcelos en consejos accionables.
-4. Si detectas alertas, abórdalas con tacto (no asustes al cliente).
-5. Sugiere productos solo si encajan con el perfil real.
-6. Usa emojis con moderación (1 máximo por respuesta).
-7. Habla de "tú" (no "usted").
-
-FICHA 360° DEL CLIENTE:
-{ficha}
-{estrategia_extra}
-"""
+    if ingreso >= 50000 and productos >= 2:
+        return 3  # Premium Healthy
+    if ingreso >= 20000 and productos >= 3 and edad < 45:
+        return 2  # Leveraged Ambitious
+    if productos == 0 or interes <= 2:
+        return 0  # The Ghost
+    if interes >= 4 and productos >= 1:
+        return 1  # Mainstream Active
+    return 4  # The Lukewarm
 
 
-# ============================================================
-# 🆕 CLASIFICADOR DE SIGNUP (heurística ponderada)
-# ============================================================
-def clasificar_cluster_signup(datos: dict) -> dict:
-    """Predice cluster DEC basado en datos de registro."""
-    edad = datos.get('edad', 30)
-    ingreso = datos.get('ingreso_mensual', 15000)
-    num_productos = datos.get('num_productos', 1)
-    interes = datos.get('interes_recomendaciones', 5)
-    producto = datos.get('producto_interes', 'cuenta').lower()
-    freq = datos.get('frecuencia_tx', 'media').lower()
-    
-    multiplicador = max(2, min(10, (edad - 18) * 0.3))
-    patrimonio = ingreso * multiplicador
-    
-    s = {0: 0, 1: 0, 2: 0, 3: 0, 4: 0}
-    
-    # Cluster 3: Premium
-    if ingreso >= 50000: s[3] += 3
-    if patrimonio >= 200000: s[3] += 2
-    if producto in ['inversion', 'seguro']: s[3] += 2
-    if edad >= 35: s[3] += 1
-    if num_productos >= 3: s[3] += 1
-    
-    # Cluster 2: Apalancado
-    if producto == 'credito': s[2] += 3
-    if 25 <= edad <= 40: s[2] += 2
-    if 20000 <= ingreso <= 60000: s[2] += 2
-    if freq == 'alta': s[2] += 1
-    if num_productos >= 2: s[2] += 1
-    
-    # Cluster 1: Mainstream
-    if freq == 'alta': s[1] += 3
-    if producto in ['tarjeta', 'cuenta']: s[1] += 2
-    if 18 <= edad <= 35: s[1] += 2
-    if 10000 <= ingreso <= 35000: s[1] += 2
-    if interes >= 7: s[1] += 1
-    
-    # Cluster 4: Tibio
-    if freq == 'baja': s[4] += 2
-    if interes <= 4: s[4] += 2
-    if num_productos == 1: s[4] += 1
-    
-    # Cluster 0: Fantasma
-    if freq == 'baja' and interes <= 3: s[0] += 3
-    if ingreso < 10000: s[0] += 1
-    
-    pred = max(s, key=s.get)
-    total = sum(s.values()) or 1
-    
-    return {
-        "cluster_dec": pred,
-        "confianza": round(s[pred] / total, 2),
-        "scores": s,
-        "patrimonio_estimado": patrimonio
-    }
+def obtener_perfil(uid):
+    """Retorna el perfil del usuario, ya sea de la DB o de los nuevos."""
+    if uid in db_clientes:
+        return db_clientes[uid]
+    if uid in USUARIOS_NUEVOS:
+        return USUARIOS_NUEVOS[uid]
+    return None
 
 
-# ============================================================
-# 🆕 ENCUENTRA CLIENTE "HERMANO" PARA NARRATIVA
-# ============================================================
-def encontrar_cliente_hermano(cluster_id: int, datos: dict) -> dict:
-    """Busca el cliente más parecido del JSON dentro del mismo cluster."""
-    candidatos = [c for c in db_clientes.values() 
-                  if c.get('cluster_dec') == cluster_id or c.get('perfil_negocio_id') == cluster_id]
-    if not candidatos:
-        return None
-    
-    edad_s = datos.get('edad', 30)
-    ingreso_s = datos.get('ingreso_mensual', 15000)
-    
-    def dist(c):
-        d_edad = abs(c.get('edad', 30) - edad_s) / 50
-        d_ing = abs(c.get('ingreso_mensual_mxn', 15000) - ingreso_s) / 100000
-        return d_edad + d_ing
-    
-    return min(candidatos, key=dist)
-
-
-# ============================================================
-# 🆕 GENERADOR DE BIENVENIDA PERSONALIZADA
-# ============================================================
-def generar_bienvenida(perfil: dict, estrategia: dict, hermano: dict) -> str:
-    contexto_hermano = ""
-    if hermano:
-        contexto_hermano = f"\nClientes similares del segmento '{estrategia['nombre']}' suelen enfocarse en: {', '.join(estrategia['ofrecer'][:2])}."
-    
-    prompt = f"""Eres HaviEr, asistente de Hey Banco. Un nuevo usuario acaba de registrarse.
-
-DATOS:
-- Edad: {perfil['edad']}, Ingreso: ${perfil['ingreso_mensual']:,}
-- Ciudad: {perfil['ciudad']}, {perfil['estado']}
-- Producto que le interesa: {perfil['producto_interes']}
-- Segmento detectado: {estrategia['nombre']}
-- Tono: {estrategia['tono']}
-{contexto_hermano}
-
-INSTRUCCIONES:
-1. Saluda con calidez (sin presentarte formalmente).
-2. Demuestra que ya entendiste su perfil sin sonar invasivo.
-3. Sugiere 1 acción concreta basada en su producto de interés.
-4. Termina con pregunta abierta.
-5. Máx 80 palabras. Tono regio mexicano.
-"""
-    
+def llamar_gemini(prompt, temperatura=0.7):
+    """Wrapper unificado para llamadas a Gemini con manejo de errores."""
     try:
         response = client.models.generate_content(
-            model='gemini-2.5-flash-lite',
-            contents=prompt
+            model=MODEL_NAME,
+            contents=prompt,
+            config=types.GenerateContentConfig(
+                temperature=temperatura,
+                max_output_tokens=400
+            )
         )
-        return response.text.strip() if response.text else f"¡Qué onda! Veo que te interesa {perfil['producto_interes']}. ¿Le entramos?"
+        return response.text.strip(), None
+    except genai_errors.ClientError as e:
+        if "429" in str(e):
+            logging.warning("⚠️ Cuota de Gemini agotada")
+            return None, ("Estoy recibiendo muchas consultas. Intenta en un momento.", 429)
+        logging.error(f"❌ Error Gemini: {e}")
+        return None, ("Error temporal con el asistente.", 500)
     except Exception as e:
-        logging.error(f"Error bienvenida: {e}")
-        return f"¡Qué onda! Veo que te interesa {perfil['producto_interes']}. Tengo ideas pa' ti — ¿le entramos?"
+        logging.error(f"❌ Error inesperado: {e}")
+        return None, ("Error interno del servidor.", 500)
 
 
 # ============================================================
-# ENDPOINTS
+# ENDPOINTS DE SALUD / KEEP-ALIVE
 # ============================================================
-
 @app.route('/health', methods=['GET'])
 def health():
     return jsonify({
         "status": "ok",
         "clientes_cargados": len(db_clientes),
-        "usuarios_nuevos": len(USUARIOS_NUEVOS)
+        "usuarios_nuevos": len(USUARIOS_NUEVOS),
+        "interacciones_log": len(INTERACCIONES_LOG)
     })
 
 
-@app.route('/api/clientes', methods=['GET'])
-def listar_clientes():
-    return jsonify({
-        "total": len(db_clientes),
-        "ids": list(db_clientes.keys())[:50]
-    })
+@app.route('/ping', methods=['GET'])
+def ping():
+    """Para cron-job.org - evita spin-down de Render."""
+    return jsonify({"pong": True, "ts": time.time()})
 
 
-# 🆕 SIGNUP
+# ============================================================
+# SIGNUP
+# ============================================================
 @app.route('/api/signup', methods=['POST'])
+@rate_limit
 def signup():
+    data = request.get_json() or {}
+    requeridos = ['nombre', 'edad', 'ingreso_mensual', 'num_productos', 'interes_recomendaciones']
+    faltantes = [c for c in requeridos if c not in data]
+    if faltantes:
+        return jsonify({"error": f"Faltan campos: {faltantes}"}), 400
+
+    # Validación de tipos
     try:
-        data = request.json
-        required = ['edad', 'ingreso_mensual', 'estado', 'ciudad',
-                    'num_productos', 'interes_recomendaciones',
-                    'producto_interes', 'frecuencia_tx']
-        for f in required:
-            if f not in data:
-                return jsonify({"error": f"Falta campo: {f}"}), 400
-        
-        clasif = clasificar_cluster_signup(data)
-        cluster_id = clasif['cluster_dec']
-        hermano = encontrar_cliente_hermano(cluster_id, data)
-        estrategia = CLUSTER_DEC_STRATEGIES[cluster_id]
-        
-        nuevo_id = f"new_{int(time.time())}_{data['edad']}"
-        
-        perfil = {
-            "user_id": nuevo_id,
-            "es_nuevo": True,
-            "edad": data['edad'],
-            "ingreso_mensual": data['ingreso_mensual'],
-            "estado": data['estado'],
-            "ciudad": data['ciudad'],
-            "num_productos": data['num_productos'],
-            "interes_recomendaciones": data['interes_recomendaciones'],
-            "producto_interes": data['producto_interes'],
-            "frecuencia_tx": data['frecuencia_tx'],
-            "cluster_dec": cluster_id,
-            "cluster_nombre": estrategia['nombre'],
-            "patrimonio_estimado": clasif['patrimonio_estimado'],
-            "hermano_id": hermano.get('user_id') if hermano else None,
-            "fecha_signup": datetime.now().isoformat()
-        }
-        
-        USUARIOS_NUEVOS[nuevo_id] = perfil
-        bienvenida = generar_bienvenida(perfil, estrategia, hermano)
-        
-        # Guardar en memoria conversacional
-        memoria[nuevo_id].append({"rol": "havi", "msg": bienvenida})
-        
-        logging.info(f"✅ Signup: {nuevo_id} → Cluster {cluster_id} ({estrategia['nombre']})")
-        
-        return jsonify({
-            "status": "success",
-            "user_id": nuevo_id,
-            "cluster_asignado": {
-                "id": cluster_id,
-                "nombre": estrategia['nombre'],
-                "confianza": clasif['confianza']
-            },
-            "mensaje_bienvenida": bienvenida
-        }), 200
-    
-    except genai_errors.ClientError as e:
-        logging.error(f"⚠️ Quota Gemini: {e}")
-        return jsonify({"error": "Servicio AI saturado, intenta en un momento"}), 429
-    except Exception as e:
-        logging.error(f"⚠️ Error signup: {e}", exc_info=True)
-        return jsonify({"error": str(e)}), 500
+        data['edad'] = int(data['edad'])
+        data['ingreso_mensual'] = float(data['ingreso_mensual'])
+        data['num_productos'] = int(data['num_productos'])
+        data['interes_recomendaciones'] = int(data['interes_recomendaciones'])
+        if not (18 <= data['edad'] <= 100):
+            return jsonify({"error": "Edad fuera de rango"}), 400
+        if data['ingreso_mensual'] < 0:
+            return jsonify({"error": "Ingreso inválido"}), 400
+    except (ValueError, TypeError):
+        return jsonify({"error": "Tipos de datos inválidos"}), 400
+
+    cluster = clasificar_nuevo_usuario(data)
+    nuevo_id = f"NEW_{int(time.time() * 1000)}"
+
+    perfil = {
+        "user_id": nuevo_id,
+        "nombre": data['nombre'],
+        "edad": data['edad'],
+        "ingreso_mensual": data['ingreso_mensual'],
+        "num_productos": data['num_productos'],
+        "interes_recomendaciones": data['interes_recomendaciones'],
+        "cluster": cluster,
+        "cluster_nombre": CLUSTER_CONFIG[cluster]["nombre"],
+        "fecha_registro": datetime.now().isoformat()
+    }
+    USUARIOS_NUEVOS[nuevo_id] = perfil
+
+    # Bienvenida personalizada
+    config = CLUSTER_CONFIG[cluster]
+    prompt = f"""Eres HaviEr, asistente financiero de Hey Banco.
+Da una bienvenida BREVE (máx 3 líneas) a {data['nombre']}.
+Tono: {config['tono']}.
+Menciona sutilmente una de estas oportunidades: {', '.join(config['ofertas'])}.
+NO uses emojis excesivos. Sé natural y humano."""
+
+    texto, error = llamar_gemini(prompt, temperatura=0.8)
+    if error:
+        bienvenida = f"¡Hola {data['nombre']}! Bienvenido a Hey Banco. Soy HaviEr, tu asistente. ¿En qué te ayudo?"
+    else:
+        bienvenida = texto
+
+    log_interaccion(nuevo_id, "signup", "", bienvenida)
+
+    return jsonify({
+        "user_id": nuevo_id,
+        "cluster": cluster,
+        "cluster_nombre": config["nombre"],
+        "bienvenida": bienvenida,
+        "perfil": perfil
+    })
 
 
-@app.route('/api/insight-proactivo', methods=['POST'])
-def insight_proactivo():
-    try:
-        uid = str(request.json.get('id_cliente', ''))
-        
-        # ✏️ Detectar usuario nuevo primero
-        if uid in USUARIOS_NUEVOS:
-            perfil = USUARIOS_NUEVOS[uid]
-            ficha = construir_ficha_usuario_nuevo(perfil)
-            cluster_id = perfil['cluster_dec']
-        else:
-            cliente = db_clientes.get(uid)
-            if not cliente:
-                return jsonify({"respuesta_havi": "¡Qué onda! Soy HaviEr. ¿En qué te ayudo hoy?"})
-            ficha = construir_ficha_inteligente(cliente)
-            cluster_id = cliente.get('cluster_dec') or cliente.get('perfil_negocio_id')
-        
-        system = construir_system_prompt(ficha, cluster_id)
-        
-        prompt_proactivo = (
-            "Genera UN saludo proactivo y personalizado para este cliente. "
-            "Detecta lo MÁS urgente o relevante de su perfil (alerta u oportunidad) "
-            "y menciónalo en forma de pregunta amigable. Máximo 2 oraciones."
-        )
-        
-        response = client.models.generate_content(
-            model='gemini-2.5-flash-lite',
-            contents=prompt_proactivo,
-            config=types.GenerateContentConfig(system_instruction=system)
-        )
-        
-        texto = response.text or "¡Qué onda! ¿En qué te ayudo hoy?"
-        memoria[uid].append({"rol": "havi", "msg": texto})
-        
-        return jsonify({"status": "success", "respuesta_havi": texto})
-    
-    except Exception as e:
-        logging.error(f"⚠️ Error proactivo: {e}")
-        return jsonify({"respuesta_havi": "¡Qué onda! ¿En qué te ayudo?"}), 200
-
-
+# ============================================================
+# CHAT
+# ============================================================
 @app.route('/api/chat-havi', methods=['POST'])
+@rate_limit
 def chat_havi():
-    try:
-        data = request.json
-        uid = str(data.get('id_cliente', ''))
-        user_message = data.get('mensaje', '').strip()
+    data = request.get_json() or {}
+    uid = str(data.get('user_id', ''))
+    user_message = data.get('mensaje', '').strip()
 
-        if not user_message:
-            return jsonify({"status": "error", "message": "Mensaje vacío"}), 400
+    if not uid or not user_message:
+        return jsonify({"error": "Faltan user_id o mensaje"}), 400
 
-        logging.info(f"💬 [{uid}]: {user_message}")
+    perfil = obtener_perfil(uid)
+    if not perfil:
+        return jsonify({"error": "Usuario no encontrado"}), 404
 
-        # ✏️ Detectar tipo de usuario
-        if uid in USUARIOS_NUEVOS:
-            perfil = USUARIOS_NUEVOS[uid]
-            ficha = construir_ficha_usuario_nuevo(perfil)
-            cluster_id = perfil['cluster_dec']
-            perfil_texto = f"Nuevo Usuario - {perfil['cluster_nombre']}"
-        else:
-            cliente = db_clientes.get(uid)
-            if not cliente:
-                ficha = "Cliente nuevo sin historial. Trátalo como prospecto."
-                cluster_id = None
-                perfil_texto = "Usuario General"
-            else:
-                ficha = construir_ficha_inteligente(cliente)
-                cluster_id = cliente.get('cluster_dec') or cliente.get('perfil_negocio_id')
-                perfil_texto = cliente.get('perfil_negocio', 'N/D')
+    cluster = perfil.get('cluster', 4)
+    config = CLUSTER_CONFIG.get(cluster, CLUSTER_CONFIG[4])
 
-        system = construir_system_prompt(ficha, cluster_id)
-        
-        # Historial
-        historial = ""
-        for turno in memoria[uid]:
-            actor = "Usuario" if turno["rol"] == "user" else "HaviEr"
-            historial += f"{actor}: {turno['msg']}\n"
-        
-        prompt_completo = f"{historial}Usuario: {user_message}\nHaviEr:"
+    # Historial truncado a últimos 4 turnos
+    historial = ""
+    for turno in list(memoria[uid])[-4:]:
+        actor = "Usuario" if turno["rol"] == "user" else "HaviEr"
+        historial += f"{actor}: {turno['msg']}\n"
 
-        response = client.models.generate_content(
-            model='gemini-2.5-flash-lite',
-            contents=prompt_completo,
-            config=types.GenerateContentConfig(
-                system_instruction=system,
-                temperature=0.7,
-            )
-        )
-        
-        texto = response.text or "Mmm, déjame procesar eso de otra forma. ¿Me lo repites?"
-        
-        memoria[uid].append({"rol": "user", "msg": user_message})
-        memoria[uid].append({"rol": "havi", "msg": texto})
-        
-        return jsonify({
-            "status": "success",
-            "perfil_detectado": perfil_texto,
-            "respuesta_havi": texto
-        })
+    prompt = f"""Eres HaviEr, asistente financiero de Hey Banco.
 
-    except genai_errors.ClientError as e:
-        logging.error(f"⚠️ Quota: {e}")
-        return jsonify({"status": "error", "message": "Servicio saturado, intenta en un momento."}), 429
-    except Exception as e:
-        logging.error(f"⚠️ Error chat: {e}", exc_info=True)
-        return jsonify({"status": "error", "message": "Sistemas en mantenimiento."}), 500
+PERFIL DEL CLIENTE:
+- Nombre: {perfil.get('nombre', 'Cliente')}
+- Segmento: {config['nombre']}
+- Tono recomendado: {config['tono']}
+- Ofertas relevantes: {', '.join(config['ofertas'])}
+
+HISTORIAL RECIENTE:
+{historial}
+
+MENSAJE ACTUAL:
+Usuario: {user_message}
+
+Responde de forma BREVE (máx 4 líneas), natural y útil. Si es relevante, sugiere sutilmente una oferta. NO repitas saludos si ya hubo conversación previa."""
+
+    texto, error = llamar_gemini(prompt, temperatura=0.7)
+    if error:
+        return jsonify({"error": error[0]}), error[1]
+
+    memoria[uid].append({"rol": "user", "msg": user_message})
+    memoria[uid].append({"rol": "havi", "msg": texto})
+    log_interaccion(uid, "chat", user_message, texto)
+
+    return jsonify({
+        "respuesta": texto,
+        "cluster": cluster,
+        "cluster_nombre": config["nombre"]
+    })
 
 
-@app.route('/api/reset-memoria', methods=['POST'])
-def reset_memoria():
-    uid = str(request.json.get('id_cliente', ''))
-    if uid in memoria:
-        del memoria[uid]
-    return jsonify({"status": "success"})
+# ============================================================
+# INSIGHT PROACTIVO
+# ============================================================
+@app.route('/api/insight-proactivo', methods=['POST'])
+@rate_limit
+def insight_proactivo():
+    data = request.get_json() or {}
+    uid = str(data.get('user_id', ''))
+
+    perfil = obtener_perfil(uid)
+    if not perfil:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+    cluster = perfil.get('cluster', 4)
+    config = CLUSTER_CONFIG.get(cluster, CLUSTER_CONFIG[4])
+
+    prompt = f"""Eres HaviEr, asistente financiero de Hey Banco.
+Genera un INSIGHT PROACTIVO breve (máx 3 líneas) para este cliente:
+
+- Nombre: {perfil.get('nombre', 'Cliente')}
+- Segmento: {config['nombre']}
+- Trigger: {config['trigger']}
+- Tono: {config['tono']}
+
+El insight debe ser una observación útil, una sugerencia o una alerta financiera relevante a su perfil. NO sea genérico."""
+
+    texto, error = llamar_gemini(prompt, temperatura=0.8)
+    if error:
+        return jsonify({"error": error[0]}), error[1]
+
+    log_interaccion(uid, "proactivo", "", texto)
+
+    return jsonify({
+        "insight": texto,
+        "cluster": cluster,
+        "cluster_nombre": config["nombre"]
+    })
 
 
-if __name__ == '__main__':
-    debug_mode = os.getenv("FLASK_DEBUG", "True").lower() == "true"
-    port = int(os.getenv("PORT", 5000))
-    app.run(debug=debug_mode, port=port, host='0.0.0.0')
-
+# ============================================================
+# DASHBOARD
+# ============================================================
 @app.route('/api/dashboard/metricas', methods=['GET'])
 def dashboard_metricas():
     """Métricas globales para el dashboard."""
-    total_clientes = len(db_clientes)
-    total_nuevos = len(USUARIOS_NUEVOS)
-    
-    # Distribución por cluster
-    dist_clusters = defaultdict(int)
+    distribucion = defaultdict(int)
     for c in db_clientes.values():
-        cid = c.get('cluster_dec') or c.get('perfil_negocio_id', -1)
-        dist_clusters[cid] += 1
-    
-    # Conversaciones activas
-    conversaciones_activas = sum(1 for m in memoria.values() if len(m) > 0)
-    total_interacciones = sum(len(m) for m in memoria.values())
-    
+        distribucion[c.get('cluster', -1)] += 1
+    for c in USUARIOS_NUEVOS.values():
+        distribucion[c.get('cluster', -1)] += 1
+
     return jsonify({
-        "total_clientes": total_clientes,
-        "usuarios_nuevos_signup": total_nuevos,
-        "conversaciones_activas": conversaciones_activas,
-        "total_interacciones": total_interacciones,
+        "total_clientes": len(db_clientes) + len(USUARIOS_NUEVOS),
+        "clientes_db": len(db_clientes),
+        "usuarios_nuevos": len(USUARIOS_NUEVOS),
+        "interacciones_totales": len(INTERACCIONES_LOG),
         "distribucion_clusters": {
-            CLUSTER_DEC_STRATEGIES[k]['nombre']: v 
-            for k, v in dist_clusters.items() if k in CLUSTER_DEC_STRATEGIES
-        }
+            CLUSTER_CONFIG.get(k, {}).get("nombre", f"Cluster {k}"): v
+            for k, v in distribucion.items()
+        },
+        "memoria_activa": len(memoria)
     })
 
 
 @app.route('/api/dashboard/cliente/<uid>', methods=['GET'])
 def dashboard_cliente(uid):
-    """Detalle completo de un cliente para el explorer."""
-    uid = str(uid)
-    if uid in USUARIOS_NUEVOS:
-        return jsonify({"tipo": "nuevo", "data": USUARIOS_NUEVOS[uid]})
-    cliente = db_clientes.get(uid)
-    if not cliente:
-        return jsonify({"error": "Cliente no encontrado"}), 404
+    """Perfil completo + historial de chat de un cliente."""
+    perfil = obtener_perfil(uid)
+    if not perfil:
+        return jsonify({"error": "Usuario no encontrado"}), 404
+
+    cluster = perfil.get('cluster', 4)
+    config = CLUSTER_CONFIG.get(cluster, CLUSTER_CONFIG[4])
+    historial = list(memoria.get(uid, []))
+
     return jsonify({
-        "tipo": "existente",
-        "data": cliente,
-        "historial_chat": list(memoria.get(uid, []))
+        "perfil": perfil,
+        "cluster_info": config,
+        "historial_chat": historial,
+        "total_turnos": len(historial)
     })
 
 
-@app.route('/api/dashboard/conversaciones', methods=['GET'])
-def dashboard_conversaciones():
-    """Lista de conversaciones recientes."""
-    convos = []
-    for uid, turnos in memoria.items():
-        if turnos:
-            convos.append({
-                "user_id": uid,
-                "num_mensajes": len(turnos),
-                "ultimo_mensaje": turnos[-1]['msg'][:100],
-                "es_nuevo": uid in USUARIOS_NUEVOS
-            })
-    return jsonify({"conversaciones": convos[:50]})
+@app.route('/api/dashboard/feed', methods=['GET'])
+def dashboard_feed():
+    """Feed en tiempo real de las últimas interacciones."""
+    return jsonify({
+        "total": len(INTERACCIONES_LOG),
+        "interacciones": list(INTERACCIONES_LOG)[-50:][::-1]
+    })
+
+
+@app.route('/api/clientes', methods=['GET'])
+def listar_clientes():
+    """Listado paginado de clientes."""
+    page = int(request.args.get('page', 1))
+    per_page = min(int(request.args.get('per_page', 50)), 200)
+    cluster_filter = request.args.get('cluster')
+
+    todos = list(db_clientes.values()) + list(USUARIOS_NUEVOS.values())
+    if cluster_filter is not None:
+        try:
+            cf = int(cluster_filter)
+            todos = [c for c in todos if c.get('cluster') == cf]
+        except ValueError:
+            pass
+
+    start = (page - 1) * per_page
+    end = start + per_page
+
+    return jsonify({
+        "total": len(todos),
+        "page": page,
+        "per_page": per_page,
+        "clientes": todos[start:end]
+    })
+
+
+@app.route('/api/reset-memoria', methods=['POST'])
+def reset_memoria():
+    data = request.get_json() or {}
+    uid = str(data.get('user_id', ''))
+    if uid in memoria:
+        del memoria[uid]
+        return jsonify({"status": "ok", "mensaje": f"Memoria de {uid} reseteada"})
+    return jsonify({"status": "ok", "mensaje": "No había memoria activa"})
+
+
+# ============================================================
+# RUN
+# ============================================================
+if __name__ == '__main__':
+    port = int(os.getenv("PORT", 5000))
+    app.run(host='0.0.0.0', port=port, debug=False)
