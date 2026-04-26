@@ -17,10 +17,6 @@ from openai import OpenAI
 # ============================================================
 # CONFIGURACIÓN INICIAL
 # ============================================================
-@app.route('/')
-def home():
-    return render_template('index.html')
-
 load_dotenv()
 logging.basicConfig(
     level=logging.INFO,
@@ -564,6 +560,14 @@ def reset_memoria():
         del memoria[uid]
         return jsonify({"status": "ok", "mensaje": f"Memoria de {uid} reseteada"})
     return jsonify({"status": "ok", "mensaje": "No había memoria activa"})
+
+
+# ============================================================
+# SERVE FRONTEND
+# ============================================================
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 
 # ============================================================
