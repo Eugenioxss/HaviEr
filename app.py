@@ -3,7 +3,7 @@ import json
 import logging
 import time
 import gc
-from flask import Flask, request, jsonify
+from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from dotenv import load_dotenv
 from google import genai
@@ -17,6 +17,10 @@ from openai import OpenAI
 # ============================================================
 # CONFIGURACIÓN INICIAL
 # ============================================================
+@app.route('/')
+def home():
+    return render_template('index.html')
+
 load_dotenv()
 logging.basicConfig(
     level=logging.INFO,
