@@ -20,9 +20,21 @@ model = genai.GenerativeModel('gemini-2.5-flash-lite')
 try:
     with open('clientes_etiquetados.json', 'r', encoding='utf-8') as f:
         clientes_data = json.load(f)
-        # Lo convertimos en un diccionario para búsquedas en milisegundos: { "10452": "Pre-Churn..." }
-        db_clientes = {str(c['id_cliente']): c['perfil_negocio'] for c in clientes_data}
+        
+        # 1. Creamos el diccionario vacío
+        db_clientes = {}
+        
+        # 2. Llenamos el diccionario usando 'user_id' (que es el nombre real en tu JSON)
+        for c in clientes_data:
+            # .get() evita que el código truene si falta una columna
+            id_cliente = str(c.get('user_id', '')) 
+            perfil = c.get('perfil_negocio', 'Perfil Desconocido')
+            
+            if id_cliente:
+                db_clientes[id_cliente] = perfil
+
     print(f"✅ ¡Base de datos cargada! {len(db_clientes)} clientes etiquetados listos.")
+
 except FileNotFoundError:
     print("⚠️ No se encontró el JSON. Havi funcionará con perfil general.")
     db_clientes = {}
