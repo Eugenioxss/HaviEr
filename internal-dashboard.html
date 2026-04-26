@@ -1,0 +1,1766 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HaviEr — Internal Customer Intelligence Dashboard</title>
+
+  <style>
+    :root {
+      --bg: #f2f0e2;
+      --surface: #ffffff;
+      --surface-soft: #f7f1e3;
+      --chip: #e5e0c3;
+      --accent: #83643e;
+      --accent-dark: #5a4a30;
+      --muted: #6c757d;
+      --muted-dark: #5a6268;
+      --text: #3a3a3a;
+      --line: #83643e;
+      --danger: #9f4d3d;
+      --warning: #a8792b;
+      --success: #58704a;
+      --shadow: 0 16px 40px rgba(58, 58, 58, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(131,100,62,0.14), transparent 34%),
+        radial-gradient(circle at bottom right, rgba(108,117,125,0.12), transparent 32%),
+        var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    button,
+    input,
+    select {
+      font-family: inherit;
+    }
+
+    .dashboard-shell {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+      gap: 18px;
+      padding: 18px;
+    }
+
+    /* SIDEBAR */
+
+    .sidebar {
+      background: rgba(242, 240, 226, 0.94);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 18px;
+      height: calc(100vh - 36px);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .logo-mark {
+      width: 42px;
+      height: 42px;
+      background: var(--accent);
+      color: #ffffff;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      flex-shrink: 0;
+    }
+
+    .brand-title {
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1;
+    }
+
+    .brand-title span {
+      color: var(--accent);
+    }
+
+    .brand-subtitle {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 5px;
+      font-weight: 600;
+    }
+
+    .internal-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      width: fit-content;
+      background: rgba(131, 100, 62, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(131, 100, 62, 0.4);
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .dot-live {
+      width: 7px;
+      height: 7px;
+      background: var(--accent);
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .nav-item {
+      width: 100%;
+      background: transparent;
+      border: 1px solid transparent;
+      color: var(--accent-dark);
+      padding: 12px 13px;
+      border-radius: 12px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 13px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: all 0.15s;
+    }
+
+    .nav-item:hover,
+    .nav-item.active {
+      background: var(--chip);
+      border-color: var(--accent);
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      background: var(--surface-soft);
+      border: 1px solid rgba(131, 100, 62, 0.45);
+      border-radius: 16px;
+      padding: 14px;
+    }
+
+    .sidebar-footer p {
+      font-size: 12px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .sidebar-footer strong {
+      display: block;
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    /* MAIN */
+
+    .main {
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .topbar {
+      background: rgba(242, 240, 226, 0.94);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+    }
+
+    .eyebrow {
+      font-size: 12px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .topbar h1 {
+      font-size: 28px;
+      letter-spacing: -0.8px;
+      line-height: 1.1;
+    }
+
+    .topbar p {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 7px;
+      max-width: 640px;
+      line-height: 1.5;
+    }
+
+    .top-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .search-box input {
+      width: 270px;
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 11px 14px;
+      outline: none;
+      font-size: 13px;
+    }
+
+    .search-box input:focus {
+      border-color: var(--accent-dark);
+    }
+
+    .btn {
+      background: var(--accent);
+      color: #ffffff;
+      border: none;
+      border-radius: 10px;
+      padding: 11px 16px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      background: var(--accent-dark);
+    }
+
+    .btn.secondary {
+      background: var(--muted);
+    }
+
+    .btn.secondary:hover {
+      background: var(--muted-dark);
+    }
+
+    /* VIEWS */
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      min-height: 128px;
+    }
+
+    .metric-card span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .metric-card strong {
+      display: block;
+      font-size: 31px;
+      color: var(--text);
+      margin: 9px 0 6px;
+      letter-spacing: -0.8px;
+    }
+
+    .metric-card p {
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.4;
+    }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 14px;
+    }
+
+    .content-grid.equal {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .panel.large {
+      min-height: 380px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .panel-header h2 {
+      font-size: 18px;
+      letter-spacing: -0.35px;
+    }
+
+    .panel-header p {
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 4px;
+      line-height: 1.45;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      background: rgba(131, 100, 62, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(131, 100, 62, 0.4);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .badge.gray {
+      background: rgba(108,117,125,0.1);
+      color: var(--muted);
+      border-color: rgba(108,117,125,0.35);
+    }
+
+    .badge.danger {
+      color: var(--danger);
+      border-color: rgba(159, 77, 61, 0.35);
+      background: rgba(159, 77, 61, 0.08);
+    }
+
+    .badge.warning {
+      color: var(--warning);
+      border-color: rgba(168, 121, 43, 0.35);
+      background: rgba(168, 121, 43, 0.08);
+    }
+
+    .badge.success {
+      color: var(--success);
+      border-color: rgba(88, 112, 74, 0.35);
+      background: rgba(88, 112, 74, 0.08);
+    }
+
+    /* CHARTS */
+
+    .bar-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      margin-top: 8px;
+    }
+
+    .bar-row {
+      display: grid;
+      grid-template-columns: 150px 1fr 46px;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .bar-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .bar-track {
+      height: 12px;
+      background: var(--surface-soft);
+      border: 1px solid rgba(131, 100, 62, 0.35);
+      border-radius: 20px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 20px;
+      min-width: 3%;
+      transition: width 0.25s ease;
+    }
+
+    .bar-value {
+      font-size: 12px;
+      color: var(--muted);
+      font-weight: 800;
+      text-align: right;
+    }
+
+    .mini-chart {
+      background: var(--surface-soft);
+      border: 1px solid rgba(131, 100, 62, 0.45);
+      border-radius: 16px;
+      padding: 12px;
+      min-height: 250px;
+    }
+
+    .line-chart {
+      width: 100%;
+      height: 220px;
+      overflow: visible;
+    }
+
+    .axis-label {
+      font-size: 10px;
+      fill: var(--muted);
+      font-weight: 700;
+    }
+
+    .line-path {
+      fill: none;
+      stroke: var(--accent);
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .line-dot {
+      fill: var(--accent);
+      stroke: #ffffff;
+      stroke-width: 2;
+    }
+
+    /* TABLES */
+
+    .table-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
+    }
+
+    .filters {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .filter-select,
+    .filter-input {
+      background: var(--surface);
+      border: 1px solid var(--accent);
+      border-radius: 10px;
+      color: var(--text);
+      padding: 10px 12px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .table-wrap {
+      overflow: auto;
+      border: 1px solid rgba(131, 100, 62, 0.45);
+      border-radius: 14px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 820px;
+      background: #ffffff;
+    }
+
+    th {
+      background: var(--surface-soft);
+      color: var(--accent-dark);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid rgba(131, 100, 62, 0.45);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 13px 12px;
+      font-size: 13px;
+      border-bottom: 1px solid rgba(131, 100, 62, 0.18);
+      color: var(--text);
+      vertical-align: middle;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    tr {
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    tbody tr:hover {
+      background: rgba(229, 224, 195, 0.45);
+    }
+
+    .user-id {
+      font-weight: 800;
+      color: var(--accent-dark);
+    }
+
+    .score {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 42px;
+      background: var(--surface-soft);
+      border: 1px solid rgba(131, 100, 62, 0.5);
+      border-radius: 9px;
+      padding: 4px 8px;
+      color: var(--accent-dark);
+      font-weight: 800;
+      font-size: 12px;
+    }
+
+    /* USER DETAIL */
+
+    .user-detail {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 14px;
+    }
+
+    .profile-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      padding: 16px;
+      background: var(--surface-soft);
+      border: 1px solid rgba(131, 100, 62, 0.45);
+      border-radius: 16px;
+      margin-bottom: 14px;
+    }
+
+    .profile-id {
+      font-size: 24px;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .profile-meta {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .insight-box {
+      background: #ffffff;
+      border: 1px solid rgba(131, 100, 62, 0.45);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .insight-box h3 {
+      font-size: 14px;
+      margin-bottom: 7px;
+      color: var(--accent-dark);
+    }
+
+    .insight-box p {
+      font-size: 13px;
+      color: var(--text);
+      line-height: 1.55;
+    }
+
+    .chip-list {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+
+    .chip {
+      background: var(--chip);
+      border: 1px solid var(--accent);
+      color: var(--accent-dark);
+      border-radius: 20px;
+      padding: 6px 11px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .conversation-card {
+      background: var(--surface-soft);
+      border: 1px solid rgba(131, 100, 62, 0.45);
+      border-radius: 14px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    .conversation-card h4 {
+      font-size: 13px;
+      color: var(--accent-dark);
+      margin-bottom: 8px;
+    }
+
+    .message {
+      font-size: 13px;
+      line-height: 1.55;
+      margin-bottom: 9px;
+    }
+
+    .message strong {
+      color: var(--accent);
+    }
+
+    .empty-state {
+      background: var(--surface-soft);
+      border: 1px dashed var(--accent);
+      border-radius: 16px;
+      padding: 28px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* PRIORITY LIST */
+
+    .priority-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .priority-card {
+      background: var(--surface-soft);
+      border: 1px solid rgba(131, 100, 62, 0.45);
+      border-radius: 14px;
+      padding: 13px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .priority-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .priority-card-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .priority-card strong {
+      color: var(--accent-dark);
+      font-size: 14px;
+    }
+
+    .priority-card p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    /* RESPONSIVE */
+
+    @media (max-width: 1100px) {
+      .dashboard-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+      }
+
+      .nav {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+      }
+
+      .metric-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .content-grid,
+      .content-grid.equal,
+      .user-detail {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .top-actions {
+        justify-content: flex-start;
+      }
+
+      .search-box input {
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .dashboard-shell {
+        padding: 10px;
+      }
+
+      .metric-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .nav {
+        grid-template-columns: 1fr;
+      }
+
+      .topbar h1 {
+        font-size: 23px;
+      }
+
+      .search-box {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+      }
+
+      .bar-row {
+        grid-template-columns: 1fr;
+        gap: 6px;
+      }
+
+      .bar-value {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="dashboard-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="logo-mark">H</div>
+        <div>
+          <div class="brand-title">Havi<span>Er</span></div>
+          <div class="brand-subtitle">Customer Intelligence</div>
+        </div>
+      </div>
+
+      <div class="internal-badge">
+        <span class="dot-live"></span>
+        Uso interno compañía
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-view="overview">📊 Overview</button>
+        <button class="nav-item" data-view="users">👤 Usuarios</button>
+        <button class="nav-item" data-view="predictions">🤖 Predicciones</button>
+        <button class="nav-item" data-view="conversations">💬 Conversaciones</button>
+        <button class="nav-item" data-view="trends">📈 Tendencias</button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <strong>Dataset actual</strong>
+        <p>
+          Base anonimizada de interacciones entre usuarios y Havi.
+          Este panel es una maqueta frontend con datos simulados.
+        </p>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+
+      <!-- TOPBAR -->
+      <header class="topbar">
+        <div>
+          <div class="eyebrow">Panel interno de análisis</div>
+          <h1>Customer Intelligence Dashboard</h1>
+          <p>
+            Insights, tendencias y predicciones basadas en conversaciones históricas.
+            No es una vista para clientes; es una herramienta interna para análisis y toma de decisiones.
+          </p>
+        </div>
+
+        <div class="top-actions">
+          <div class="search-box">
+            <input id="globalSearch" type="text" placeholder="Buscar User ID, ej. USR-09092" />
+            <button class="btn" onclick="searchUser()">Buscar</button>
+          </div>
+          <button class="btn secondary" onclick="resetDashboard()">Reset</button>
+        </div>
+      </header>
+
+      <!-- OVERVIEW -->
+      <section id="view-overview" class="view active">
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span>Usuarios únicos</span>
+            <strong>15,025</strong>
+            <p>Perfiles anonimizados disponibles</p>
+          </div>
+
+          <div class="metric-card">
+            <span>Conversaciones</span>
+            <strong>24,119</strong>
+            <p>Agrupadas por conv_id</p>
+          </div>
+
+          <div class="metric-card">
+            <span>Interacciones</span>
+            <strong>49,999</strong>
+            <p>Mensajes usuario + respuesta Havi</p>
+          </div>
+
+          <div class="metric-card">
+            <span>Canal dominante</span>
+            <strong>Texto</strong>
+            <p>channel_source = 1</p>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <div class="panel large">
+            <div class="panel-header">
+              <div>
+                <h2>Tendencias principales detectadas</h2>
+                <p>Temas más frecuentes en las conversaciones analizadas.</p>
+              </div>
+              <span class="badge">IA predictiva</span>
+            </div>
+
+            <div id="topicBars" class="bar-chart"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Usuarios prioritarios</h2>
+                <p>Usuarios con mayor valor analítico para seguimiento interno.</p>
+              </div>
+            </div>
+
+            <div id="priorityUsers" class="priority-list"></div>
+          </div>
+        </div>
+
+        <div class="content-grid equal" style="margin-top: 14px;">
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Actividad mensual</h2>
+                <p>Volumen simulado para validar la interfaz.</p>
+              </div>
+              <span class="badge gray">Mock data</span>
+            </div>
+
+            <div class="mini-chart">
+              <svg id="activityLine" class="line-chart" viewBox="0 0 640 220" preserveAspectRatio="none"></svg>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Distribución por segmento</h2>
+                <p>Segmentos que después puede entregar el modelo.</p>
+              </div>
+            </div>
+
+            <div id="segmentBars" class="bar-chart"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- USERS -->
+      <section id="view-users" class="view">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Explorador de usuarios</h2>
+              <p>Selecciona un usuario para ver su insight individual, predicción y conversaciones.</p>
+            </div>
+            <span class="badge">Vista interna</span>
+          </div>
+
+          <div class="table-toolbar">
+            <div class="filters">
+              <input id="userFilter" class="filter-input" type="text" placeholder="Filtrar por User ID o segmento" oninput="renderUsersTable()" />
+
+              <select id="riskFilter" class="filter-select" onchange="renderUsersTable()">
+                <option value="">Todos los riesgos</option>
+                <option value="Alto">Riesgo alto</option>
+                <option value="Medio">Riesgo medio</option>
+                <option value="Bajo">Riesgo bajo</option>
+              </select>
+
+              <select id="channelFilter" class="filter-select" onchange="renderUsersTable()">
+                <option value="">Todos los canales</option>
+                <option value="Texto">Texto</option>
+                <option value="Voz">Voz</option>
+              </select>
+            </div>
+
+            <button class="btn" onclick="selectUser(users[0].id)">Ver usuario ejemplo</button>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>User ID</th>
+                  <th>Segmento</th>
+                  <th>Interacciones</th>
+                  <th>Conversaciones</th>
+                  <th>Canal</th>
+                  <th>Última actividad</th>
+                  <th>Riesgo</th>
+                  <th>Score</th>
+                  <th>Acción sugerida</th>
+                </tr>
+              </thead>
+              <tbody id="usersTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="userDetailContainer" style="margin-top: 14px;"></div>
+      </section>
+
+      <!-- PREDICTIONS -->
+      <section id="view-predictions" class="view">
+        <div class="metric-grid">
+          <div class="metric-card">
+            <span>Alta intención</span>
+            <strong>34%</strong>
+            <p>Usuarios con señales de conversión</p>
+          </div>
+
+          <div class="metric-card">
+            <span>Riesgo medio/alto</span>
+            <strong>22%</strong>
+            <p>Usuarios que requieren intervención</p>
+          </div>
+
+          <div class="metric-card">
+            <span>Producto más consultado</span>
+            <strong>Tarjeta</strong>
+            <p>Mayor frecuencia temática</p>
+          </div>
+
+          <div class="metric-card">
+            <span>Confianza promedio</span>
+            <strong>78%</strong>
+            <p>Predicciones simuladas</p>
+          </div>
+        </div>
+
+        <div class="content-grid">
+          <div class="panel large">
+            <div class="panel-header">
+              <div>
+                <h2>Predicciones por tipo de usuario</h2>
+                <p>Vista preparada para conectar con el modelo de ML o IA generativa.</p>
+              </div>
+              <span class="badge">Modelo pendiente</span>
+            </div>
+
+            <div id="predictionBars" class="bar-chart"></div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Acciones recomendadas</h2>
+                <p>Qué puede hacer negocio con los insights.</p>
+              </div>
+            </div>
+
+            <div class="insight-box">
+              <h3>1. Usuarios benefit seeker</h3>
+              <p>Mostrar promociones, cashback, beneficios y comparadores de tarjetas.</p>
+            </div>
+
+            <div class="insight-box">
+              <h3>2. Usuarios con fricción</h3>
+              <p>Detectar dudas repetidas, errores de activación o consultas de soporte.</p>
+            </div>
+
+            <div class="insight-box">
+              <h3>3. Usuarios de alta actividad</h3>
+              <p>Ofrecer productos complementarios o personalizar el onboarding.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONVERSATIONS -->
+      <section id="view-conversations" class="view">
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Conversaciones recientes</h2>
+              <p>Explorador interno del historial conversacional agrupado por usuario.</p>
+            </div>
+            <span class="badge gray">conv_id</span>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Conv ID</th>
+                  <th>User ID</th>
+                  <th>Fecha</th>
+                  <th>Canal</th>
+                  <th>Tema</th>
+                  <th>Riesgo</th>
+                  <th>Resumen</th>
+                </tr>
+              </thead>
+              <tbody id="conversationTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div id="conversationDetail" style="margin-top: 14px;"></div>
+      </section>
+
+      <!-- TRENDS -->
+      <section id="view-trends" class="view">
+        <div class="content-grid equal">
+          <div class="panel large">
+            <div class="panel-header">
+              <div>
+                <h2>Temas emergentes</h2>
+                <p>Para detectar qué preguntan más los usuarios.</p>
+              </div>
+            </div>
+
+            <div id="emergingBars" class="bar-chart"></div>
+          </div>
+
+          <div class="panel large">
+            <div class="panel-header">
+              <div>
+                <h2>Canales de atención</h2>
+                <p>Distribución simulada entre texto y voz.</p>
+              </div>
+            </div>
+
+            <div id="channelBars" class="bar-chart"></div>
+          </div>
+        </div>
+
+        <div class="panel" style="margin-top: 14px;">
+          <div class="panel-header">
+            <div>
+              <h2>Lectura estratégica</h2>
+              <p>Resumen ejecutivo que después puede generar la IA automáticamente.</p>
+            </div>
+            <span class="badge">Executive summary</span>
+          </div>
+
+          <div class="insight-box">
+            <h3>Hallazgo principal</h3>
+            <p>
+              Los usuarios parecen concentrarse en dudas sobre tarjetas, promociones, cashback,
+              pagos y activación. El dashboard debe permitir cruzar estas señales con canal,
+              frecuencia, riesgo e intención para priorizar acciones comerciales y de soporte.
+            </p>
+          </div>
+
+          <div class="insight-box">
+            <h3>Oportunidad</h3>
+            <p>
+              Si el modelo identifica usuarios con alta intención de producto, la compañía puede
+              personalizar recomendaciones, activar campañas específicas y reducir fricción en puntos críticos.
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // ════════════════════════════════════
+    // MOCK DATA
+    // Después esto se reemplaza por llamadas al backend:
+    // fetch('/api/users'), fetch('/api/users/:id/insights'), etc.
+    // ════════════════════════════════════
+
+    const users = [
+      {
+        id: "USR-09092",
+        segment: "Benefit seeker",
+        interactions: 7,
+        conversations: 2,
+        channel: "Texto",
+        lastSeen: "2025-08-18",
+        risk: "Medio",
+        score: 76,
+        intent: "Busca beneficios, cashback y tarjetas.",
+        recommendation: "Mostrar promociones relacionadas con cashback y tarjeta de crédito.",
+        summary: "Usuario con interés en productos financieros con beneficios tangibles. Sus conversaciones sugieren comparación de tarjetas, promociones y posibles dudas de conversión.",
+        topics: ["Cashback", "Tarjeta de crédito", "Pagos gubernamentales"],
+        conversationsData: [
+          {
+            convId: "000502c2-288c-41f6-b751-a8b45a376a81",
+            date: "2025-08-17",
+            topic: "Cashback",
+            summary: "Consulta sobre promoción de pagos gubernamentales.",
+            messages: [
+              {
+                input: "Me enteré de una promo Supercashback Pagos Gubernamentales.",
+                output: "Claro que puedo ayudarte. Para participar en la promoción debes revisar las condiciones vigentes."
+              },
+              {
+                input: "La tarjeta de crédito Hey Negocios es diferente de la TDC normal?",
+                output: "Sí. La Tarjeta de Crédito Hey Negocios puede tener características distintas según el perfil y producto."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "USR-00218",
+        segment: "High intent",
+        interactions: 18,
+        conversations: 5,
+        channel: "Texto",
+        lastSeen: "2025-10-04",
+        risk: "Bajo",
+        score: 91,
+        intent: "Muestra intención alta hacia productos de crédito.",
+        recommendation: "Activar flujo de oferta personalizada o simulador de producto.",
+        summary: "Usuario activo con preguntas recurrentes sobre requisitos, beneficios y condiciones. Alto potencial comercial.",
+        topics: ["Crédito", "Requisitos", "Activación"],
+        conversationsData: [
+          {
+            convId: "7aa2c6f1-b5f2-4781-91c0-c12d1a001fab",
+            date: "2025-10-04",
+            topic: "Crédito",
+            summary: "Pregunta por requisitos y condiciones.",
+            messages: [
+              {
+                input: "¿Qué necesito para solicitar una tarjeta?",
+                output: "Necesitas validar tu identidad y cumplir con los criterios de evaluación del producto."
+              },
+              {
+                input: "¿Puedo saber si soy candidato antes de aplicar?",
+                output: "Podemos orientarte con la información general, pero la aprobación depende de la evaluación final."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "USR-07104",
+        segment: "Support friction",
+        interactions: 12,
+        conversations: 4,
+        channel: "Voz",
+        lastSeen: "2025-09-21",
+        risk: "Alto",
+        score: 62,
+        intent: "Tiene fricción operativa o dudas repetidas.",
+        recommendation: "Priorizar atención preventiva y revisar posible causa de confusión.",
+        summary: "Usuario con señales de posible frustración. Conviene revisar patrones de conversación para detectar errores, barreras de activación o problemas recurrentes.",
+        topics: ["Soporte", "Activación", "Movimientos"],
+        conversationsData: [
+          {
+            convId: "e91f86c9-df07-4d17-a651-18ca8b5a3a12",
+            date: "2025-09-21",
+            topic: "Activación",
+            summary: "Dudas repetidas sobre activación de producto.",
+            messages: [
+              {
+                input: "No puedo activar mi tarjeta, ya intenté varias veces.",
+                output: "Lamento el inconveniente. Vamos a revisar los pasos de activación y posibles causas."
+              },
+              {
+                input: "Me vuelve a marcar error.",
+                output: "Entiendo. Te sugiero validar conexión, datos ingresados y, si persiste, levantar un reporte."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "USR-01488",
+        segment: "Low activity",
+        interactions: 3,
+        conversations: 1,
+        channel: "Texto",
+        lastSeen: "2025-07-11",
+        risk: "Medio",
+        score: 54,
+        intent: "Exploración inicial sin señales fuertes.",
+        recommendation: "Mostrar onboarding guiado y preguntas frecuentes.",
+        summary: "Usuario con poca actividad. Todavía no hay suficiente historial para predicción robusta.",
+        topics: ["Saldo", "Cuenta", "Onboarding"],
+        conversationsData: [
+          {
+            convId: "b55e71bb-39d4-45a5-93bb-d3fefc10a911",
+            date: "2025-07-11",
+            topic: "Saldo",
+            summary: "Consulta básica de cuenta.",
+            messages: [
+              {
+                input: "¿Cómo puedo ver mi saldo?",
+                output: "Puedes consultar tu saldo desde la app o preguntarme directamente cuando tengas sesión activa."
+              }
+            ]
+          }
+        ]
+      },
+      {
+        id: "USR-12011",
+        segment: "Product explorer",
+        interactions: 24,
+        conversations: 7,
+        channel: "Texto",
+        lastSeen: "2025-11-03",
+        risk: "Bajo",
+        score: 84,
+        intent: "Explora varios productos financieros.",
+        recommendation: "Ofrecer comparación clara entre cuenta, tarjeta, inversión y crédito.",
+        summary: "Usuario con alto volumen de preguntas sobre varios productos. Puede beneficiarse de recomendaciones personalizadas.",
+        topics: ["Inversión", "Tarjeta", "Cuenta"],
+        conversationsData: [
+          {
+            convId: "cccf1232-45fa-4c20-bb33-109b4bb3a8ef",
+            date: "2025-11-03",
+            topic: "Inversión",
+            summary: "Consulta sobre opciones de inversión.",
+            messages: [
+              {
+                input: "¿Qué opciones tengo para invertir?",
+                output: "Puedes revisar las alternativas disponibles en la plataforma y elegir según tu perfil de riesgo."
+              },
+              {
+                input: "¿También puedo usar tarjeta?",
+                output: "Sí, también puedes explorar productos de tarjeta según disponibilidad y elegibilidad."
+              }
+            ]
+          }
+        ]
+      }
+    ];
+
+    const topicData = [
+      { label: "Tarjetas de crédito", value: 86 },
+      { label: "Cashback y promociones", value: 74 },
+      { label: "Pagos y transferencias", value: 68 },
+      { label: "Activación de producto", value: 51 },
+      { label: "Movimientos y saldo", value: 43 },
+      { label: "Crédito", value: 39 }
+    ];
+
+    const segmentData = [
+      { label: "Benefit seeker", value: 34 },
+      { label: "Product explorer", value: 26 },
+      { label: "Support friction", value: 18 },
+      { label: "High intent", value: 14 },
+      { label: "Low activity", value: 8 }
+    ];
+
+    const predictionData = [
+      { label: "Alta intención comercial", value: 82 },
+      { label: "Requiere soporte", value: 58 },
+      { label: "Probable conversión", value: 73 },
+      { label: "Riesgo de abandono", value: 41 },
+      { label: "Interés en tarjeta", value: 88 },
+      { label: "Interés en inversión", value: 36 }
+    ];
+
+    const emergingData = [
+      { label: "Cashback", value: 91 },
+      { label: "Pagos gubernamentales", value: 77 },
+      { label: "Activación de tarjeta", value: 66 },
+      { label: "Tarjeta negocios", value: 52 },
+      { label: "Errores de app", value: 43 }
+    ];
+
+    const channelData = [
+      { label: "Texto", value: 78 },
+      { label: "Voz", value: 22 }
+    ];
+
+    const monthlyActivity = [
+      { label: "Ene", value: 22 },
+      { label: "Feb", value: 28 },
+      { label: "Mar", value: 34 },
+      { label: "Abr", value: 42 },
+      { label: "May", value: 38 },
+      { label: "Jun", value: 51 },
+      { label: "Jul", value: 48 },
+      { label: "Ago", value: 59 },
+      { label: "Sep", value: 67 },
+      { label: "Oct", value: 72 },
+      { label: "Nov", value: 80 }
+    ];
+
+    // ════════════════════════════════════
+    // NAVIGATION
+    // ════════════════════════════════════
+
+    document.querySelectorAll(".nav-item").forEach(button => {
+      button.addEventListener("click", () => {
+        const view = button.getAttribute("data-view");
+        switchView(view);
+      });
+    });
+
+    function switchView(view) {
+      document.querySelectorAll(".nav-item").forEach(btn => {
+        btn.classList.toggle("active", btn.getAttribute("data-view") === view);
+      });
+
+      document.querySelectorAll(".view").forEach(section => {
+        section.classList.toggle("active", section.id === `view-${view}`);
+      });
+    }
+
+    // ════════════════════════════════════
+    // RENDER HELPERS
+    // ════════════════════════════════════
+
+    function getRiskBadge(risk) {
+      if (risk === "Alto") return `<span class="badge danger">Alto</span>`;
+      if (risk === "Medio") return `<span class="badge warning">Medio</span>`;
+      return `<span class="badge success">Bajo</span>`;
+    }
+
+    function renderBars(containerId, data) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+
+      container.innerHTML = data.map(item => `
+        <div class="bar-row">
+          <div class="bar-label" title="${item.label}">${item.label}</div>
+          <div class="bar-track">
+            <div class="bar-fill" style="width: ${item.value}%"></div>
+          </div>
+          <div class="bar-value">${item.value}%</div>
+        </div>
+      `).join("");
+    }
+
+    function renderLineChart() {
+      const svg = document.getElementById("activityLine");
+      if (!svg) return;
+
+      const width = 640;
+      const height = 220;
+      const paddingX = 36;
+      const paddingY = 30;
+      const max = Math.max(...monthlyActivity.map(d => d.value));
+      const min = Math.min(...monthlyActivity.map(d => d.value));
+
+      const points = monthlyActivity.map((d, i) => {
+        const x = paddingX + (i * ((width - paddingX * 2) / (monthlyActivity.length - 1)));
+        const normalized = (d.value - min) / (max - min);
+        const y = height - paddingY - normalized * (height - paddingY * 2);
+        return { x, y, ...d };
+      });
+
+      const path = points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ");
+
+      svg.innerHTML = `
+        <line x1="${paddingX}" y1="${height - paddingY}" x2="${width - paddingX}" y2="${height - paddingY}" stroke="rgba(131,100,62,0.35)" />
+        <line x1="${paddingX}" y1="${paddingY}" x2="${paddingX}" y2="${height - paddingY}" stroke="rgba(131,100,62,0.35)" />
+
+        <path class="line-path" d="${path}" />
+
+        ${points.map(p => `
+          <circle class="line-dot" cx="${p.x}" cy="${p.y}" r="5" />
+          <text class="axis-label" x="${p.x}" y="${height - 8}" text-anchor="middle">${p.label}</text>
+          <text class="axis-label" x="${p.x}" y="${p.y - 10}" text-anchor="middle">${p.value}</text>
+        `).join("")}
+      `;
+    }
+
+    // ════════════════════════════════════
+    // USERS
+    // ════════════════════════════════════
+
+    function renderPriorityUsers() {
+      const container = document.getElementById("priorityUsers");
+      if (!container) return;
+
+      const priority = [...users]
+        .sort((a, b) => b.score - a.score)
+        .slice(0, 4);
+
+      container.innerHTML = priority.map(user => `
+        <div class="priority-card" onclick="selectUser('${user.id}')">
+          <div class="priority-card-top">
+            <strong>${user.id}</strong>
+            ${getRiskBadge(user.risk)}
+          </div>
+          <p><strong>${user.segment}</strong> · ${user.recommendation}</p>
+        </div>
+      `).join("");
+    }
+
+    function renderUsersTable() {
+      const tbody = document.getElementById("usersTableBody");
+      if (!tbody) return;
+
+      const textFilter = document.getElementById("userFilter")?.value.toLowerCase() || "";
+      const riskFilter = document.getElementById("riskFilter")?.value || "";
+      const channelFilter = document.getElementById("channelFilter")?.value || "";
+
+      const filtered = users.filter(user => {
+        const matchesText =
+          user.id.toLowerCase().includes(textFilter) ||
+          user.segment.toLowerCase().includes(textFilter) ||
+          user.intent.toLowerCase().includes(textFilter);
+
+        const matchesRisk = !riskFilter || user.risk === riskFilter;
+        const matchesChannel = !channelFilter || user.channel === channelFilter;
+
+        return matchesText && matchesRisk && matchesChannel;
+      });
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="9">No se encontraron usuarios con esos filtros.</td>
+          </tr>
+        `;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(user => `
+        <tr onclick="selectUser('${user.id}')">
+          <td><span class="user-id">${user.id}</span></td>
+          <td>${user.segment}</td>
+          <td>${user.interactions}</td>
+          <td>${user.conversations}</td>
+          <td>${user.channel}</td>
+          <td>${user.lastSeen}</td>
+          <td>${getRiskBadge(user.risk)}</td>
+          <td><span class="score">${user.score}</span></td>
+          <td>${user.recommendation}</td>
+        </tr>
+      `).join("");
+    }
+
+    function selectUser(userId) {
+      const user = users.find(u => u.id === userId);
+
+      if (!user) {
+        alert("No encontré ese User ID en los datos mock. Prueba con USR-09092.");
+        return;
+      }
+
+      switchView("users");
+
+      const container = document.getElementById("userDetailContainer");
+      if (!container) return;
+
+      container.innerHTML = `
+        <div class="user-detail">
+          <div class="panel">
+            <div class="profile-header">
+              <div>
+                <div class="profile-id">${user.id}</div>
+                <div class="profile-meta">
+                  Segmento: <strong>${user.segment}</strong><br>
+                  Última actividad: ${user.lastSeen}<br>
+                  Canal dominante: ${user.channel}
+                </div>
+              </div>
+
+              <div>
+                ${getRiskBadge(user.risk)}
+              </div>
+            </div>
+
+            <div class="insight-box">
+              <h3>Resumen IA del usuario</h3>
+              <p>${user.summary}</p>
+            </div>
+
+            <div class="insight-box">
+              <h3>Intención detectada</h3>
+              <p>${user.intent}</p>
+            </div>
+
+            <div class="insight-box">
+              <h3>Acción recomendada</h3>
+              <p>${user.recommendation}</p>
+            </div>
+
+            <div class="insight-box">
+              <h3>Temas frecuentes</h3>
+              <div class="chip-list">
+                ${user.topics.map(topic => <span class="chip">${topic}</span>).join("")}
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <div>
+                <h2>Ficha analítica</h2>
+                <p>Métricas del usuario seleccionado.</p>
+              </div>
+              <span class="score">${user.score}</span>
+            </div>
+
+            <div class="metric-grid" style="grid-template-columns: repeat(2, 1fr); margin-bottom: 14px;">
+              <div class="metric-card">
+                <span>Interacciones</span>
+                <strong>${user.interactions}</strong>
+                <p>Total histórico</p>
+              </div>
+
+              <div class="metric-card">
+                <span>Conversaciones</span>
+                <strong>${user.conversations}</strong>
+                <p>Agrupadas</p>
+              </div>
+            </div>
+
+            <div class="insight-box">
+              <h3>Conversaciones recientes</h3>
+              <p>Historial reconstruido desde conv_id.</p>
+            </div>
+
+            ${user.conversationsData.map(conv => `
+              <div class="conversation-card">
+                <h4>${conv.convId}</h4>
+                <p class="message"><strong>Fecha:</strong> ${conv.date}</p>
+                <p class="message"><strong>Tema:</strong> ${conv.topic}</p>
+                <p class="message"><strong>Resumen:</strong> ${conv.summary}</p>
+
+                ${conv.messages.map(msg => `
+                  <p class="message"><strong>Usuario:</strong> ${msg.input}</p>
+                  <p class="message"><strong>Havi:</strong> ${msg.output}</p>
+                `).join("")}
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    function searchUser() {
+      const query = document.getElementById("globalSearch").value.trim().toUpperCase();
+
+      if (!query) {
+        alert("Escribe un User ID. Ejemplo: USR-09092");
+        return;
+      }
+
+      const user = users.find(u => u.id === query);
+
+      if (!user) {
+        alert("No encontré ese User ID en los datos mock. Prueba con USR-09092, USR-00218 o USR-07104.");
+        return;
+      }
+
+      selectUser(user.id);
+    }
+
+    function resetDashboard() {
+      document.getElementById("globalSearch").value = "";
+      const userFilter = document.getElementById("userFilter");
+      const riskFilter = document.getElementById("riskFilter");
+      const channelFilter = document.getElementById("channelFilter");
+
+      if (userFilter) userFilter.value = "";
+      if (riskFilter) riskFilter.value = "";
+      if (channelFilter) channelFilter.value = "";
+
+      const detail = document.getElementById("userDetailContainer");
+      if (detail) detail.innerHTML = "";
+
+      const conversationDetail = document.getElementById("conversationDetail");
+      if (conversationDetail) conversationDetail.innerHTML = "";
+
+      renderUsersTable();
+      switchView("overview");
+    }
+
+    // ════════════════════════════════════
+    // CONVERSATIONS
+    // ════════════════════════════════════
+
+    function getAllConversations() {
+      return users.flatMap(user =>
+        user.conversationsData.map(conv => ({
+          ...conv,
+          userId: user.id,
+          channel: user.channel,
+          risk: user.risk
+        }))
+      );
+    }
+
+    function renderConversationTable() {
+      const tbody = document.getElementById("conversationTableBody");
+      if (!tbody) return;
+
+      const conversations = getAllConversations();
+
+      tbody.innerHTML = conversations.map(conv => `
+        <tr onclick="selectConversation('${conv.convId}')">
+          <td><span class="user-id">${conv.convId.slice(0, 8)}...</span></td>
+          <td>${conv.userId}</td>
+          <td>${conv.date}</td>
+          <td>${conv.channel}</td>
+          <td>${conv.topic}</td>
+          <td>${getRiskBadge(conv.risk)}</td>
+          <td>${conv.summary}</td>
+        </tr>
+      `).join("");
+    }
+
+    function selectConversation(convId) {
+      const conv = getAllConversations().find(c => c.convId === convId);
+      const container = document.getElementById("conversationDetail");
+
+      if (!conv || !container) return;
+
+      container.innerHTML = `
+        <div class="panel">
+          <div class="panel-header">
+            <div>
+              <h2>Detalle de conversación</h2>
+              <p>${conv.convId}</p>
+            </div>
+            <span class="badge">${conv.userId}</span>
+          </div>
+
+          <div class="insight-box">
+            <h3>Resumen</h3>
+            <p>${conv.summary}</p>
+          </div>
+
+          <div class="conversation-card">
+            <p class="message"><strong>Fecha:</strong> ${conv.date}</p>
+            <p class="message"><strong>Canal:</strong> ${conv.channel}</p>
+            <p class="message"><strong>Tema:</strong> ${conv.topic}</p>
+            <p class="message"><strong>Riesgo:</strong> ${conv.risk}</p>
+          </div>
+
+          ${conv.messages.map(msg => `
+            <div class="conversation-card">
+              <p class="message"><strong>Usuario:</strong> ${msg.input}</p>
+              <p class="message"><strong>Havi:</strong> ${msg.output}</p>
+            </div>
+          `).join("")}
+        </div>
+      `;
+
+      container.scrollIntoView({ behavior: "smooth" });
+    }
+
+    // ════════════════════════════════════
+    // INIT
+    // ════════════════════════════════════
+
+    function initDashboard() {
+      renderBars("topicBars", topicData);
+      renderBars("segmentBars", segmentData);
+      renderBars("predictionBars", predictionData);
+      renderBars("emergingBars", emergingData);
+      renderBars("channelBars", channelData);
+
+      renderLineChart();
+      renderPriorityUsers();
+      renderUsersTable();
+      renderConversationTable();
+
+      document.getElementById("globalSearch").addEventListener("keydown", event => {
+        if (event.key === "Enter") searchUser();
+      });
+    }
+
+    initDashboard();
+  </script>
+</body>
+</html>
