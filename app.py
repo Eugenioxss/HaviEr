@@ -12,6 +12,7 @@ from google.genai import errors as genai_errors
 from collections import defaultdict, deque
 from datetime import datetime
 from functools import wraps
+from openai import OpenAI
 
 # ============================================================
 # CONFIGURACIÓN INICIAL
@@ -34,6 +35,18 @@ CORS(app, origins=ALLOWED_ORIGINS)
 
 client = genai.Client(api_key=API_KEY)
 MODEL_NAME = "gemini-2.5-flash-lite"
+
+# MiMo Client Configuration
+MIMO_API_KEY = os.getenv("MIMO_API_KEY")
+mimo_client = None
+if MIMO_API_KEY:
+    mimo_client = OpenAI(
+        api_key=MIMO_API_KEY,
+        base_url="https://api.xiaomimimo.com/v1"
+    )
+    logging.info("✅ MiMo client initialized")
+else:
+    logging.warning("⚠️ MIMO_API_KEY not found in .env - MiMo fallback disabled")
 
 # ============================================================
 # ESTADO EN RAM
@@ -174,6 +187,54 @@ def llamar_gemini(prompt, temperatura=0.7):
         return None, ("Error interno del servidor.", 500)
 
 
+def llamar_mimo(prompt, temperatura=0.7):
+    """Wrapper para llamadas a MiMo con manejo de errores."""
+    if not mimo_client:
+        return None, ("Servicio de MiMo no disponible.", 503)
+    
+    try:
+        response = mimo_client.chat.completions.create(
+            model="mimo-v2.5-pro",
+            messages=[
+                {"role": "system", "content": ""},
+                {"role": "user", "content": prompt}
+            ],
+            max_completion_tokens=1024,
+            temperature=temperatura,
+            top_p=0.95,
+            stream=False,
+            stop=None,
+            frequency_penalty=0,
+            presence_penalty=0
+        )
+        return response.choices[0].message.content.strip(), None
+    except Exception as e:
+        logging.error(f"❌ Error MiMo: {e}")
+        return None, ("Error temporal con el asistente.", 500)
+
+
+def llamar_con_fallback(prompt, temperatura=0.7):
+    """Wrapper con fallback configurable según FALLBACK_PRIORITY."""
+    priority_str = os.getenv("FALLBACK_PRIORITY", "mimo,gemini")
+    priorities = [p.strip().lower() for p in priority_str.split(",")]
+    
+    last_error = None
+    
+    for model in priorities:
+        if model == "mimo":
+            texto, error = llamar_mimo(prompt, temperatura)
+            if error is None:
+                return texto, None
+            last_error = error
+        elif model == "gemini":
+            texto, error = llamar_gemini(prompt, temperatura)
+            if error is None:
+                return texto, None
+            last_error = error
+    
+    return None, last_error
+
+
 # ============================================================
 # ENDPOINTS DE SALUD / KEEP-ALIVE
 # ============================================================
@@ -242,7 +303,7 @@ Tono: {config['tono']}.
 Menciona sutilmente una de estas oportunidades: {', '.join(config['ofertas'])}.
 NO uses emojis excesivos. Sé natural y humano."""
 
-    texto, error = llamar_gemini(prompt, temperatura=0.8)
+    texto, error = llamar_con_fallback(prompt, temperatura=0.8)
     if error:
         bienvenida = f"¡Hola {data['nombre']}! Bienvenido a Hey Banco. Soy HaviEr, tu asistente. ¿En qué te ayudo?"
     else:
@@ -344,16 +405,16 @@ def chat_havi():
 ═══ MENSAJE DEL USUARIO ═══
 "{user_message}"
 
-═══ REGLAS ESTRICTAS ═══
-1. NUNCA uses placeholders como [Cantidad], [Nombre], [Saldo]. Usa los números reales de arriba.
-2. Si no tienes el nombre, dirígete como "{saludo_genero}" o sin saludo si ya hubo conversación.
-3. Si el usuario pregunta por su saldo, dale el número real: ${saldo:,.2f}.
-4. Si pregunta por su deuda o crédito, usa los datos reales de arriba.
-5. NO repitas saludos si el historial ya muestra interacción.
-6. Si sugieres una oferta, hazlo natural y al final, no fuerces venta.
-7. Responde SOLO el mensaje al usuario. Nada de meta-comentarios ni etiquetas."""
+ ═══ REGLAS ESTRICTAS ═══
+ 1. NUNCA uses placeholders como [Cantidad], [Nombre], [Saldo]. Usa los números reales de arriba.
+ 2. Si no tienes el nombre, dirígete como "{saludo_genero}" o sin saludo si ya hubo conversación.
+ 3. Si el usuario pregunta por su saldo, dale el número real: ${saldo:,.2f}.
+ 4. Si pregunta por su deuda o crédito, usa los datos reales de arriba.
+ 5. NO repitas saludos si el historial ya muestra interacción.
+ 6. Si sugieres una oferta, hazlo natural y al final, no fuerces venta.
+ 7. Responde SOLO el mensaje al usuario. Nada de meta-comentarios ni etiquetas."""
 
-    texto, error = llamar_gemini(prompt, temperatura=0.7)
+    texto, error = llamar_con_fallback(prompt, temperatura=0.7)
     if error:
         return jsonify({"error": error[0]}), error[1]
 
@@ -399,7 +460,7 @@ Genera un INSIGHT PROACTIVO breve (máx 3 líneas) para este cliente:
 
 El insight debe ser una observación útil, una sugerencia o una alerta financiera relevante a su perfil. NO sea genérico."""
 
-    texto, error = llamar_gemini(prompt, temperatura=0.8)
+    texto, error = llamar_con_fallback(prompt, temperatura=0.8)
     if error:
         return jsonify({"error": error[0]}), error[1]
 

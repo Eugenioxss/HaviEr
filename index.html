@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hey Banco — HaviEr Asistente IA</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Helvetica Neue', Arial, sans-serif;
+      background: #f2f0e2;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .app {
+      background: #f2f0e2;
+      width: 100%;
+      max-width: 480px;
+      min-height: 700px;
+      border-radius: 20px;
+      border: 1px solid #83643e;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* ── Navbar ── */
+    .navbar {
+      background: #f2f0e2;
+      border-bottom: 1px solid #83643e;
+      padding: 0 20px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+
+    .logo-mark {
+      width: 36px; height: 36px;
+      background: #83643e;
+      border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+
+    .logo-mark svg { width: 20px; height: 20px; }
+
+    .logo-text {
+      font-size: 19px; font-weight: 700;
+      color: #3a3a3a;
+      letter-spacing: -0.4px;
+    }
+
+    .logo-text span { color: #83643e; }
+
+    .nav-tag {
+      font-size: 11px;
+      color: #83643e;
+      border: 1px solid rgba(131,100,62,0.4);
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: rgba(131,100,62,0.1);
+      font-weight: 600;
+    }
+
+    /* ── Hero ── */
+    .hero {
+      background: #f2f0e2;
+      padding: 28px 20px 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-glow {
+      position: absolute;
+      top: -50px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 320px;
+      height: 200px;
+      background: rgba(131,100,62,0.15);
+      border-radius: 50%;
+      filter: blur(50px);
+      pointer-events: none;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(131,100,62,0.12);
+      border: 1px solid rgba(131,100,62,0.4);
+      color: #83643e;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 12px;
+    }
+
+    .dot-live {
+      width: 6px; height: 6px;
+      background: #83643e;
+      border-radius: 50%;
+      animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+
+    .hero h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #3a3a3a;
+      margin-bottom: 6px;
+      letter-spacing: -0.5px;
+    }
+
+    .hero h1 span { color: #83643e; }
+
+    .hero p {
+      font-size: 13px;
+      color: #6c757d;
+      max-width: 340px;
+      line-height: 1.6;
+    }
+
+    /* ── Selector de cliente ── */
+    .client-selector {
+      background: #e5e0c3;
+      padding: 12px 16px;
+      border-radius: 10px;
+      border: 1px solid #83643e;
+      margin: 10px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .client-selector label {
+      font-size: 12px;
+      color: #5a4a30;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .id-badge {
+      display: inline-block;
+      background: #83643e;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 10px;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .input-wrapper input {
+      flex: 1;
+      background: #ffffff;
+      border: 1px solid #83643e;
+      color: #3a3a3a;
+      padding: 8px 12px;
+      border-radius: 8px;
+      outline: none;
+      font-size: 13px;
+      font-family: inherit;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .input-wrapper input:focus { border-color: #5a4a30; }
+
+    .input-wrapper button {
+      background: #83643e;
+      color: #fff;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: inherit;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .input-wrapper button:hover { background: #5a4a30; }
+    .input-wrapper button:active { transform: scale(0.96); }
+    .input-wrapper button:disabled { background: #b0a890; cursor: not-allowed; }
+
+    .client-status {
+      font-size: 11px;
+      color: #5a4a30;
+      font-style: italic;
+      padding-left: 2px;
+      min-height: 14px;
+    }
+
+    .client-status.connected { color: #2d7a3e; font-style: normal; font-weight: 600; }
+    .client-status.error { color: #c0392b; font-style: normal; font-weight: 600; }
+
+    /* ── Quick chips ── */
+    .quick-chips {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: center;
+      padding: 6px 20px 14px;
+    }
+
+    .chip {
+      background: #e5e0c3;
+      border: 1px solid #83643e;
+      color: #5a4a30;
+      font-size: 12px;
+      padding: 7px 14px;
+      border-radius: 20px;
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      font-family: inherit;
+    }
+
+    .chip:hover:not(:disabled) {
+      background: #83643e;
+      color: #ffffff;
+    }
+
+    .chip:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ── Chat area ── */
+    .chat-area {
+      flex: 1;
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      overflow-y: auto;
+      min-height: 260px;
+      max-height: 340px;
+      background: #ffffff;
+      margin: 0 16px;
+      border-radius: 12px;
+      border: 1px solid #83643e;
+    }
+
+    .chat-area::-webkit-scrollbar { width: 4px; }
+    .chat-area::-webkit-scrollbar-thumb { background: #83643e; border-radius: 4px; }
+
+    .msg { display: flex; gap: 8px; align-items: flex-end; padding: 0 4px; }
+    .msg.bot { flex-direction: row; }
+    .msg.user { flex-direction: row-reverse; }
+
+    .avatar {
+      width: 30px; height: 30px;
+      border-radius: 50%;
+      background: #83643e;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      font-size: 12px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .avatar.user-av {
+      background: #6c757d;
+      color: #ffffff;
+      border: 1px solid #5a6268;
+    }
+
+    .bubble {
+      max-width: 78%;
+      padding: 10px 14px;
+      border-radius: 14px;
+      font-size: 13px;
+      line-height: 1.55;
+      white-space: pre-line;
+    }
+
+    .bot-bubble {
+      background: #f7f1e3;
+      border: 1px solid #83643e;
+      color: #3a3a3a;
+      border-bottom-left-radius: 4px;
+    }
+
+    .user-bubble {
+      background: #6c757d;
+      color: #ffffff;
+      border-bottom-right-radius: 4px;
+    }
+
+    /* ── Typing indicator ── */
+    .typing {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+      padding: 12px 14px;
+    }
+
+    .typing span {
+      width: 6px; height: 6px;
+      background: #83643e;
+      border-radius: 50%;
+      animation: bounce 1.2s infinite;
+    }
+
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce {
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-7px); }
+    }
+
+    /* ── Feature strip ── */
+    .feature-strip {
+      display: flex;
+      border-top: 1px solid #83643e;
+      border-bottom: 1px solid #83643e;
+      background: #f2f0e2;
+      margin-top: 10px;
+    }
+
+    .feat {
+      flex: 1;
+      padding: 9px 6px;
+      text-align: center;
+      border-right: 1px solid #83643e;
+    }
+
+    .feat:last-child { border-right: none; }
+    .feat-icon { font-size: 15px; margin-bottom: 2px; }
+    .feat-label { font-size: 10px; color: #83643e; }
+
+    /* ── Input row ── */
+    .input-row {
+      display: flex;
+      gap: 10px;
+      padding: 12px 16px;
+      background: #f2f0e2;
+      border-top: 1px solid #83643e;
+      align-items: center;
+    }
+
+    .chat-input {
+      flex: 1;
+      background: #ffffff;
+      border: 1px solid #83643e;
+      color: #3a3a3a;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 13px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+
+    .chat-input::placeholder { color: #b0a890; }
+    .chat-input:focus { border-color: #5a4a30; }
+
+    .chat-input:disabled {
+      background: #f0ede0;
+      cursor: not-allowed;
+    }
+
+    .send-btn {
+      width: 38px; height: 38px;
+      background: #83643e;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .send-btn:hover:not(:disabled) { background: #5a4a30; }
+    .send-btn:active { transform: scale(0.95); }
+    .send-btn:disabled { background: #b0a890; cursor: not-allowed; }
+    .send-btn svg { width: 16px; height: 16px; fill: #fff; }
+
+    .cluster-tag {
+      display: inline-block;
+      font-size: 10px;
+      background: #83643e;
+      color: #ffffff;
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app">
+
+  <nav class="navbar">
+    <a class="nav-logo" href="https://hey.inc" target="_blank">
+      <div class="logo-mark">
+        <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="10" cy="10" r="8" stroke="white" stroke-width="2"/>
+          <path d="M6 10h8M10 6v8" stroke="white" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <span class="logo-text">hey<span>,</span> banco</span>
+    </a>
+    <span class="nav-tag">Demo Hackathon</span>
+  </nav>
+
+  <div class="hero">
+    <div class="hero-glow"></div>
+    <div class="hero-badge"><span class="dot-live"></span>Asistente activo</div>
+    <h1><span>HaviEr</span></h1>
+    <p>Asistente proactivo con IA. Ingresa el ID del cliente para iniciar una conversación personalizada.</p>
+  </div>
+
+  <div class="client-selector">
+    <label for="clientInput">
+      <span class="id-badge">ID</span> Cliente:
+    </label>
+    <div class="input-wrapper">
+      <input
+        type="text"
+        id="clientInput"
+        placeholder="Ej. USR-00001"
+        autocomplete="off"
+        maxlength="10"
+      />
+      <button id="loadClientBtn" type="button">Cargar</button>
+    </div>
+    <p id="clientStatus" class="client-status">⏸ Esperando ID de cliente...</p>
+  </div>
+
+  <div class="quick-chips">
+    <button class="chip" onclick="selectChip('Hola Havi, ¿quién soy yo según tus datos?')">¿Quién soy?</button>
+    <button class="chip" onclick="selectChip('¿Qué oportunidades tienes para mí?')">Oportunidades</button>
+    <button class="chip" onclick="selectChip('Dame un consejo financiero personalizado')">Consejo</button>
+    <button class="chip" onclick="selectChip('¿Cómo está mi salud financiera?')">Mi salud financiera</button>
+  </div>
+
+  <div class="chat-area" id="chat">
+    <div class="msg bot">
+      <div class="avatar">H</div>
+      <div class="bubble bot-bubble">¡Hola! Soy <strong>HaviEr</strong>, tu asistente proactivo de hey, banco. Ingresa un ID de cliente (ej. <strong>USR-00001</strong>) y presiona <strong>Cargar</strong> para comenzar.</div>
+    </div>
+  </div>
+
+  <div class="feature-strip">
+    <div class="feat"><div class="feat-icon">🔒</div><div class="feat-label">Seguro</div></div>
+    <div class="feat"><div class="feat-icon">⚡</div><div class="feat-label">Instantáneo</div></div>
+    <div class="feat"><div class="feat-icon">🤖</div><div class="feat-label">IA predictiva</div></div>
+    <div class="feat"><div class="feat-icon">💳</div><div class="feat-label">Personalizado</div></div>
+  </div>
+
+  <div class="input-row">
+    <input class="chat-input" id="userInput" type="text" placeholder="Carga un cliente primero..." disabled />
+    <button class="send-btn" id="sendBtn" disabled>
+      <svg viewBox="0 0 16 16"><path d="M1 8l13-7-4 7 4 7z"/></svg>
+    </button>
+  </div>
+
+</div>
+
+<script>
+  // ════════════════════════════════════
+  // CONFIGURACIÓN
+  // ════════════════════════════════════
+  const API_URL = 'http://127.0.0.1:5000/api/chat-havi';
+  const USER_ID_REGEX = /^USR-\d{5}$/;
+  let currentUserId = '';
+
+  // ════════════════════════════════════
+  // CARGAR CLIENTE
+  // ════════════════════════════════════
+  function loadClient() {
+    const input = document.getElementById('clientInput');
+    const status = document.getElementById('clientStatus');
+    const chatInput = document.getElementById('userInput');
+    const sendBtn = document.getElementById('sendBtn');
+
+    const id = input.value.trim().toUpperCase();
+    input.value = id;
+
+    if (!id) {
+      status.textContent = '⚠️ Ingresa un ID de cliente';
+      status.className = 'client-status error';
+      return;
+    }
+
+    if (!USER_ID_REGEX.test(id)) {
+      status.textContent = '⚠️ Formato inválido. Usa USR-##### (ej. USR-00001)';
+      status.className = 'client-status error';
+      return;
+    }
+
+    currentUserId = id;
+    status.textContent = `✅ Cliente activo: ${currentUserId}`;
+    status.className = 'client-status connected';
+
+    chatInput.disabled = false;
+    sendBtn.disabled = false;
+    chatInput.placeholder = 'Escribe tu mensaje...';
+
+    // Limpia el chat y muestra saludo contextual
+    const chat = document.getElementById('chat');
+    chat.innerHTML = '';
+    addMsg(`Listo. Estoy revisando el perfil de <strong>${currentUserId}</strong>. ¿En qué te puedo ayudar?`, false);
+    chatInput.focus();
+  }
+
+  // ════════════════════════════════════
+  // RENDER DE MENSAJES
+  // ════════════════════════════════════
+  function addMsg(text, isUser, clusterName = null) {
+    const chat = document.getElementById('chat');
+    const msg = document.createElement('div');
+    msg.className = 'msg ' + (isUser ? 'user' : 'bot');
+
+    const av = document.createElement('div');
+    av.className = 'avatar' + (isUser ? ' user-av' : '');
+    av.textContent = isUser ? 'Tú' : 'H';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble ' + (isUser ? 'user-bubble' : 'bot-bubble');
+
+    if (isUser) {
+      bubble.textContent = text;
+    } else {
+      bubble.innerHTML = text;
+      if (clusterName) {
+        const tag = document.createElement('div');
+        tag.className = 'cluster-tag';
+        tag.textContent = '🎯 ' + clusterName;
+        bubble.appendChild(tag);
+      }
+    }
+
+    msg.appendChild(av);
+    msg.appendChild(bubble);
+    chat.appendChild(msg);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function addTyping() {
+    const chat = document.getElementById('chat');
+    const msg = document.createElement('div');
+    msg.className = 'msg bot';
+    msg.id = 'typing-indicator';
+    const av = document.createElement('div');
+    av.className = 'avatar';
+    av.textContent = 'H';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble bot-bubble typing';
+    bubble.innerHTML = '<span></span><span></span><span></span>';
+    msg.appendChild(av);
+    msg.appendChild(bubble);
+    chat.appendChild(msg);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function removeTyping() {
+    const t = document.getElementById('typing-indicator');
+    if (t) t.remove();
+  }
+
+  // ════════════════════════════════════
+  // ENVÍO DE MENSAJE
+  // ════════════════════════════════════
+  async function sendMsg() {
+    const inp = document.getElementById('userInput');
+    const status = document.getElementById('clientStatus');
+    const text = inp.value.trim();
+
+    if (!text) return;
+    if (!currentUserId) {
+      alert('⚠️ Carga un cliente primero');
+      return;
+    }
+
+    inp.value = '';
+    addMsg(text, true);
+    addTyping();
+    status.textContent = '🧠 HaviEr está analizando...';
+    status.className = 'client-status';
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: currentUserId,
+          mensaje: text
+        })
+      });
+
+      const data = await response.json();
+      removeTyping();
+
+      if (response.ok && data.respuesta) {
+        let formatted = data.respuesta.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+        formatted = formatted.replace(/\n/g, '<br>');
+        addMsg(formatted, false, data.cluster_nombre);
+        status.textContent = `✅ Cliente activo: ${currentUserId}`;
+        status.className = 'client-status connected';
+      } else {
+        const errorMsg = data.error || 'Error desconocido';
+        addMsg('⚠️ ' + errorMsg, false);
+        status.textContent = '❌ ' + errorMsg;
+        status.className = 'client-status error';
+      }
+    } catch (error) {
+      removeTyping();
+      addMsg('⚠️ Error de conexión. Verifica que el backend Flask esté corriendo en el puerto 5000.', false);
+      status.textContent = '❌ Backend desconectado';
+      status.className = 'client-status error';
+      console.error('Error:', error);
+    }
+  }
+
+  function selectChip(msg) {
+    if (!currentUserId) {
+      alert('⚠️ Carga un cliente primero');
+      return;
+    }
+    document.getElementById('userInput').value = msg;
+    sendMsg();
+  }
+
+  // ════════════════════════════════════
+  // EVENTOS
+  // ════════════════════════════════════
+  document.getElementById('loadClientBtn').addEventListener('click', loadClient);
+
+  document.getElementById('clientInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      loadClient();
+    }
+  });
+
+  document.getElementById('userInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendMsg();
+  });
+
+  document.getElementById('sendBtn').addEventListener('click', sendMsg);
+</script>
+</body>
+</html>
