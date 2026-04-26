@@ -159,12 +159,11 @@
         <h1>Havi Core</h1>
         
         <div class="control-panel">
-            <label for="perfilSimulado">🔍 Motor ML (Clustering):</label>
-            <select id="perfilSimulado">
-                <option value="Joven Universitario, alto gasto en apps, bajo ahorro">Cluster 1: Gen-Z Tecnológico</option>
-                <option value="Viajero frecuente, altos ingresos, transacciones internacionales">Cluster 2: Viajero Premium</option>
-                <option value="Usuario tradicional, pagos en efectivo, temeroso del crédito">Cluster 3: Tradicional Precavido</option>
-            </select>
+            <label for="clienteId">🆔 ID de Cliente:</label>
+            <input type="text" id="clienteId" placeholder="Ej. 12345" style="width: 150px;">
+            <div id="statusCluster" style="color: var(--hey-blue); font-size: 0.85rem; font-style: italic;">
+                Esperando conexión...
+            </div>
         </div>
 
         <div class="chat-box" id="chatBox">
@@ -183,52 +182,52 @@
 
     <script>
         async function sendMessage() {
+            const idField = document.getElementById('clienteId');
             const inputField = document.getElementById('userInput');
             const message = inputField.value.trim();
-            const perfil = document.getElementById('perfilSimulado').value;
+            const clientId = idField.value.trim();
             const chatBox = document.getElementById('chatBox');
             const loading = document.getElementById('loadingIndicator');
+            const statusCluster = document.getElementById('statusCluster');
 
-            if (!message) return;
+            if (!message || !clientId) {
+                alert("Por favor ingresa un ID de cliente y un mensaje.");
+                return;
+            }
 
-            // Agregar mensaje del usuario a la pantalla
             appendMessage('user', message);
             inputField.value = '';
             
-            // Mostrar indicador de carga
             loading.style.display = 'block';
             chatBox.scrollTop = chatBox.scrollHeight;
 
             try {
-                // Hacer la petición a tu Backend de Flask
+                // Ahora mandamos el ID, no el perfil
                 const response = await fetch('http://127.0.0.1:5000/api/chat-havi', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        perfil: perfil,
+                        id_cliente: clientId,
                         mensaje: message
                     })
                 });
 
                 const data = await response.json();
-
-                // Ocultar carga
                 loading.style.display = 'none';
 
                 if (data.status === 'success') {
-                    // Procesar negritas de Markdown a HTML simple para que se vea bien
+                    // Te mostramos en pantalla qué cluster detectó el backend
+                    statusCluster.innerText = "Diagnóstico ML: " + data.perfil_detectado;
+                    
                     let formattedResponse = data.respuesta_havi.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
                     appendMessage('havi', formattedResponse);
                 } else {
-                    appendMessage('havi', 'Error en el sistema central: ' + data.message);
+                    appendMessage('havi', 'Error en el núcleo de procesamiento: ' + data.message);
                 }
 
             } catch (error) {
                 loading.style.display = 'none';
-                appendMessage('havi', 'Error de conexión. Verifica que el cerebro Flask esté corriendo en el puerto 5000.');
-                console.error('Error:', error);
+                appendMessage('havi', 'Error de conexión. Verifica el puerto 5000.');
             }
         }
 
