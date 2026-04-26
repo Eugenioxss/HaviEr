@@ -219,3 +219,31 @@ __marimo__/
 
 # data
 data/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+.venv/
+
+# Variables sensibles
+.env
+*.env
+
+# Base de datos local
+*.db
+*.sqlite
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

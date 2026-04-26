@@ -507,3 +507,61 @@ if __name__ == '__main__':
     debug_mode = os.getenv("FLASK_DEBUG", "True").lower() == "true"
     port = int(os.getenv("PORT", 5000))
     app.run(debug=debug_mode, port=port, host='0.0.0.0')
+
+@app.route('/api/dashboard/metricas', methods=['GET'])
+def dashboard_metricas():
+    """Métricas globales para el dashboard."""
+    total_clientes = len(db_clientes)
+    total_nuevos = len(USUARIOS_NUEVOS)
+    
+    # Distribución por cluster
+    dist_clusters = defaultdict(int)
+    for c in db_clientes.values():
+        cid = c.get('cluster_dec') or c.get('perfil_negocio_id', -1)
+        dist_clusters[cid] += 1
+    
+    # Conversaciones activas
+    conversaciones_activas = sum(1 for m in memoria.values() if len(m) > 0)
+    total_interacciones = sum(len(m) for m in memoria.values())
+    
+    return jsonify({
+        "total_clientes": total_clientes,
+        "usuarios_nuevos_signup": total_nuevos,
+        "conversaciones_activas": conversaciones_activas,
+        "total_interacciones": total_interacciones,
+        "distribucion_clusters": {
+            CLUSTER_DEC_STRATEGIES[k]['nombre']: v 
+            for k, v in dist_clusters.items() if k in CLUSTER_DEC_STRATEGIES
+        }
+    })
+
+
+@app.route('/api/dashboard/cliente/<uid>', methods=['GET'])
+def dashboard_cliente(uid):
+    """Detalle completo de un cliente para el explorer."""
+    uid = str(uid)
+    if uid in USUARIOS_NUEVOS:
+        return jsonify({"tipo": "nuevo", "data": USUARIOS_NUEVOS[uid]})
+    cliente = db_clientes.get(uid)
+    if not cliente:
+        return jsonify({"error": "Cliente no encontrado"}), 404
+    return jsonify({
+        "tipo": "existente",
+        "data": cliente,
+        "historial_chat": list(memoria.get(uid, []))
+    })
+
+
+@app.route('/api/dashboard/conversaciones', methods=['GET'])
+def dashboard_conversaciones():
+    """Lista de conversaciones recientes."""
+    convos = []
+    for uid, turnos in memoria.items():
+        if turnos:
+            convos.append({
+                "user_id": uid,
+                "num_mensajes": len(turnos),
+                "ultimo_mensaje": turnos[-1]['msg'][:100],
+                "es_nuevo": uid in USUARIOS_NUEVOS
+            })
+    return jsonify({"conversaciones": convos[:50]})
